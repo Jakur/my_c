@@ -19,8 +19,6 @@ Data Data::apply(Data *other, BinaryOperator op)
             float res = num_op(this->f, op, other->f);
             return Data(res);
         }
-        default:
-            return Data(0);
         }
     }
 

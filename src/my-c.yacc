@@ -45,7 +45,7 @@ void yyerror(const char* s);
 %union {
   float number;
   char * var_name;
-  exp_node *exp_node_ptr;
+  Exp *exp_node_ptr;
   stmt_node *stmt_node_ptr;
 }
 
@@ -93,9 +93,9 @@ stmt: ID EQUALS exp {
  ;
 
 
-exp:	exp PLUS mulexp { $$ = new add_node($1, $3); }
+exp:	exp PLUS mulexp { $$ = new BinaryExp($1, ADD, $3); }
 
-      |	exp MINUS mulexp { $$ = new subtract_node($1, $3); }
+      |	exp MINUS mulexp { $$ = new BinaryExp($1, SUB, $3); }
 
       |	mulexp {  $$ = $1; }
 ;
@@ -103,23 +103,21 @@ exp:	exp PLUS mulexp { $$ = new add_node($1, $3); }
 
 
 mulexp:	mulexp TIMES primexp {
-	  $$ = new multiply_node($1, $3); }
+	  $$ = new BinaryExp($1, MUL, $3); }
 
       | mulexp DIVIDE primexp {
-	  $$ = new divide_node($1, $3); }
+	  $$ = new BinaryExp($1, DIV, $3); }
 
       | primexp { $$=$1;  }
 ;
 
 
+// Fix negation
+primexp:	LPAREN exp RPAREN  {  $$ = $2; }
 
-primexp:	MINUS primexp  { $$ = new neg_node($2); }
+      |	NUMBER { $$ = new LiteralExp(Data($1)); }
 
-      |	LPAREN exp RPAREN  {  $$ = $2; }
-
-      |	NUMBER { $$ = new number_node($1); }
-
-      | ID { $$ = new variable_node($1); }
+      | ID { $$ = new VarExp($1); }
 ;
  
 %%
@@ -134,7 +132,7 @@ int main(int argc, char **argv)
 
   root -> print();
 
-  cout << "---------- exeution of input program------------" << endl << endl;
+  cout << "---------- execution of input program------------" << endl << endl;
   
 
   root->evaluate();

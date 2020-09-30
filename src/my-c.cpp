@@ -13,164 +13,7 @@ Data VarExp::evaluate()
   return Data(f);
 }
 
-// the constructor for node links the node to its children,
-// and stores the character representation of the operator.
-binaryOp_node::binaryOp_node(exp_node *L, exp_node *R)
-{
-  left = L;
-  right = R;
-}
-
-number_node::number_node(float value)
-{
-  num = value;
-}
-
-void number_node::print()
-{
-  cout << num;
-}
-
-float number_node::evaluate()
-{
-  return num;
-}
-
-variable_node::variable_node(string value) : id(value) {}
-
-void variable_node::print()
-{
-  cout << id;
-}
-
-float variable_node::evaluate()
-{
-  return state[id];
-}
-
-// add_node inherits the characteristics of node and adds its own evaluate function
-// add_node's constructor just uses node's constructor
-add_node::add_node(exp_node *L, exp_node *R) : binaryOp_node(L, R)
-{
-}
-
-void add_node::print()
-{
-  cout << "(";
-  left->print();
-  cout << " + ";
-  right->print();
-  cout << ")";
-}
-
-float add_node::evaluate()
-{
-  float left_num, right_num;
-
-  left_num = left->evaluate();
-  right_num = right->evaluate();
-
-  return left_num + right_num;
-}
-
-// subtract_node inherits the characteristics of node and adds its own evaluate function
-subtract_node::subtract_node(exp_node *L, exp_node *R) : binaryOp_node(L, R)
-{
-}
-
-void subtract_node::print()
-{
-  cout << "(";
-  left->print();
-  cout << " - ";
-  right->print();
-  cout << ")";
-}
-
-float subtract_node::evaluate()
-{
-  float left_num, right_num;
-
-  left_num = left->evaluate();
-  right_num = right->evaluate();
-
-  return left_num - right_num;
-}
-
-// multiply_node inherits the characteristics of node and adds its own evaluate function
-multiply_node::multiply_node(exp_node *L, exp_node *R) : binaryOp_node(L, R)
-{
-}
-
-void multiply_node::print()
-{
-  cout << "(";
-  left->print();
-  cout << " * ";
-  right->print();
-  cout << ")";
-}
-
-float multiply_node::evaluate()
-{
-  float left_num, right_num;
-
-  left_num = left->evaluate();
-  right_num = right->evaluate();
-
-  return left_num * right_num;
-}
-
-// divide_node inherits the characteristics of node and adds its own evaluate function
-
-divide_node::divide_node(exp_node *L, exp_node *R) : binaryOp_node(L, R)
-{
-}
-
-void divide_node::print()
-{
-  cout << "(";
-  left->print();
-  cout << " / ";
-  right->print();
-  cout << ")";
-}
-
-float divide_node::evaluate()
-{
-  float left_num, right_num;
-
-  left_num = left->evaluate();
-  right_num = right->evaluate();
-
-  if (right_num)
-  {
-    return left_num / right_num;
-  }
-  else
-  {
-    cout << "division by zero -> " << left_num << " / " << 0 << endl;
-    //  include stdlib.h for exit
-    exit(1);
-  }
-}
-
-neg_node::neg_node(exp_node *L) : exp(L) {}
-
-void neg_node::print()
-{
-  cout << "- ( ";
-  exp->print();
-  cout << " )";
-}
-
-float neg_node::evaluate()
-{
-  float expValue = exp->evaluate();
-  return -expValue;
-}
-
-assign_node::assign_node(std::string name, exp_node *expression)
+assign_node::assign_node(std::string name, Exp *expression)
     : id(name), exp(expression) {}
 
 void assign_node::print()
@@ -181,12 +24,12 @@ void assign_node::print()
 
 void assign_node::evaluate()
 {
-  float result = exp->evaluate();
+  float result = exp->evaluate().f; // Todo fix unsafety
 
   state[id] = result;
 }
 
-print_node::print_node(exp_node *myexp) : exp(myexp) {}
+print_node::print_node(Exp *myexp) : exp(myexp) {}
 
 void print_node::print()
 {
@@ -196,7 +39,7 @@ void print_node::print()
 
 void print_node::evaluate()
 {
-  cout << "output: " << exp->evaluate() << endl
+  cout << "output: " << exp->evaluate().f << endl // Todo fix unsafety
        << endl;
 }
 
