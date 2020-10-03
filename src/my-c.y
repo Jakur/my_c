@@ -44,6 +44,7 @@ void yyerror(const char* s);
 
 %union {
   float number;
+  int integer;
   char * var_name;
   Exp *exp_node_ptr;
   stmt_node *stmt_node_ptr;
@@ -52,8 +53,11 @@ void yyerror(const char* s);
 %error-verbose
 
 %token <number> NUMBER
+%token <integer> INTEGER
 %token <var_name> ID
-%token SEMICOLON  EQUALS PRINT  PLUS MINUS TIMES DIVIDE  LPAREN RPAREN LBRACE RBRACE
+%token SEMICOLON EQUALS PRINT PLUS MINUS TIMES DIVIDE LPAREN RPAREN LBRACE RBRACE
+%token AND
+%token PASS RETURN IF THEN ELSE END WHILE DO COMMA
 %type <exp_node_ptr> exp
 %type <exp_node_ptr> mulexp
 %type <exp_node_ptr> primexp 
@@ -62,11 +66,145 @@ void yyerror(const char* s);
 %type <stmt_node_ptr> program
 
 %%
+// New
+// program:
+//     func-decl
+//   | program func-decl
+// ;
+// stmts:
+//     stmt
+//   | stmt stmts
+// ;
+// stmt:
+//     PASS SEMICOLON
+//   | var-dec
+//   | asgn-stmt
+//   | if-stmt 
+//   | while-stmt 
+//   | return-stmt
+// ;
+// asgn-stmt:
+//   ID EQUALS exp
+// ;
+// // Types 
+// prim: 
+//   INTEGER 
+//   | FLOAT 
+//   | CHAR 
+//   | BOOL 
+//   | STRING
+// ;
+// type: 
+//   prim 
+//   | array-type
+// ;
 
-program : stmtlist { root = $$; }
+// dims: 
+//     LSQUARE exp RSQUARE
+//   | LSQUARE exp RSQUARE dims
+// ;
+// array-type: 
+//   prim dims
+// ;
+// array-index:
+//   ID dims
+// ;
+
+// // Control Flow
+// if-stmt: 
+//   IF exp THEN stmts END 
+//   | IF exp THEN stmts ELSE stmts END
+// ;
+// while-stmt:
+//   WHILE exp DO stmts END
+// ;
+
+// // Operators and expressions
+// exp: 
+//   bool-term 
+//   | exp bool-op bool-term
+// ;
+// bool-op:
+//   AND
+// ;
+// bool-term:
+//   weak-exp 
+//   | bool-term weak-exp
+// ;
+
+// weak-exp:
+//   strong-exp
+//   | weak-exp weak-op strong-exp
+// ;
+
+// weak-op:
+//   PLUS
+//   | MINUS
+// ;
+
+// strong-exp:
+//   not-exp 
+//   | strong-exp strong-op not-exp 
+// ;
+
+// strong-op:
+//   TIMES
+//   | DIVIDE
+// ;
+
+// not-exp:
+//   EXCLAM num-term
+//   | num-term
+// ;
+
+// num-term:
+//   func-invo
+//   | array-index
+//   | LPAREN exp RPAREN
+//   | ID
+// ;
+
+// // Var Dec 
+// var-dec:
+//   type declaration-list SEMICOLON 
+//   | type ID EQUALS LBRACE exp-list RBRACE SEMICOLON
+// ;
+// declaration-list:
+//   declaration 
+//   | declaration COMMA declaration-list
+// ;
+// declaration:
+//   ID
+//   | ID EQUALS exp
+// ;
+
+// // Functions
+// func-decl:
+//   type ID LPAREN RPAREN stmts END
+//   | type ID LPARER parameter-list RPAREN stmts END 
+// ;
+// parameter-list:
+//   type ID 
+//   | type ID COMMA parameter-list
+// ;
+// func-invo:
+//   ID LPAREN RPAREN
+//   | ID LPAREN exp-list RPAREN
+// ;
+// exp-list:
+//   exp
+//   | exp-list COMMA exp
+// ;
+// return-stmt:
+//   RETURN ID SEMICOLON 
+// ;
+
+
+// Old
+program: stmtlist { root = $$; }
 ;
 
-stmtlist : stmtlist SEMICOLON stmt
+stmtlist: stmtlist SEMICOLON stmt
             { // copy up the list and add the stmt to it
               $$ = new sequence_node($1,$3);
             }
@@ -93,9 +231,9 @@ stmt: ID EQUALS exp {
  ;
 
 
-exp:	exp PLUS mulexp { $$ = new BinaryExp($1, ADD, $3); }
+exp:	exp PLUS mulexp { $$ = new BinaryExp($1, BinaryOperator::ADD, $3); }
 
-      |	exp MINUS mulexp { $$ = new BinaryExp($1, SUB, $3); }
+      |	exp MINUS mulexp { $$ = new BinaryExp($1, BinaryOperator::SUB, $3); }
 
       |	mulexp {  $$ = $1; }
 ;
@@ -103,10 +241,10 @@ exp:	exp PLUS mulexp { $$ = new BinaryExp($1, ADD, $3); }
 
 
 mulexp:	mulexp TIMES primexp {
-	  $$ = new BinaryExp($1, MUL, $3); }
+	  $$ = new BinaryExp($1, BinaryOperator::MUL, $3); }
 
       | mulexp DIVIDE primexp {
-	  $$ = new BinaryExp($1, DIV, $3); }
+	  $$ = new BinaryExp($1, BinaryOperator::DIV, $3); }
 
       | primexp { $$=$1;  }
 ;

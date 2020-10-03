@@ -2,7 +2,7 @@
 #include <string>
 #include <variant>
 
-enum BinaryOperator
+enum class BinaryOperator
 {
     MUL,
     DIV,
@@ -35,6 +35,7 @@ public:
     Data(int i);
     Data(char c);
     Data(float f);
+    Data();
     Data apply(Data *other, BinaryOperator op);
 };
 
@@ -43,13 +44,13 @@ T num_op(T left, BinaryOperator op, T right)
 {
     switch (op)
     {
-    case ADD:
+    case BinaryOperator::ADD:
         return left + right;
-    case SUB:
+    case BinaryOperator::SUB:
         return left - right;
-    case MUL:
+    case BinaryOperator::MUL:
         return left * right;
-    case DIV:
+    case BinaryOperator::DIV:
         return left / right;
     default:
         return left; // Todo finish operations

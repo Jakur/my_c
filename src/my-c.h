@@ -110,4 +110,4 @@ public:
 };
 
 // the object at the base of our tree
-extern map<string, float> state;
+extern map<string, Data> state;

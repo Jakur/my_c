@@ -60,6 +60,18 @@ print   { return PRINT; }
 "="     { return EQUALS; }
 ";"    {return SEMICOLON;}
 
+"&&" {return AND;}
+
+"pass" {return PASS;} // PASS RETURN IF THEN ELSE END WHILE DO
+"return" {return RETURN;}
+"if" {return IF;}
+"then" {return THEN;}
+"else" {return ELSE;}
+"end" {return END;}
+"while" {return WHILE;}
+"do" {return DO;}
+"," {return COMMA;}
+
 . { BEGIN(ERROR); yymore(); }
 <ERROR>[^{DIGIT}{LETTER}+\-/*(){}= \t\n\f\r] { yymore(); }
 <ERROR>(.|\n) { yyless(yyleng-1); printf("error token: %s on line %d\n", yytext, line_num); 

@@ -2,7 +2,7 @@
 
 Data::Data(int i) : tag{Data::INT}, i{i} {}
 Data::Data(float f) : tag{Data::FLOAT}, f{f} {}
-
+Data::Data() : Data(0) {}
 Data Data::apply(Data *other, BinaryOperator op)
 {
     if (this->tag == other->tag)

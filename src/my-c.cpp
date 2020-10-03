@@ -9,8 +9,9 @@ using namespace std;
 
 Data VarExp::evaluate()
 {
-  float f = state[this->id]; // Todo fix the state map
-  return Data(f);
+  auto d = state[this->id];
+  // float f = d.f; // Todo fix the state map
+  return Data(d);
 }
 
 assign_node::assign_node(std::string name, Exp *expression)
@@ -24,7 +25,7 @@ void assign_node::print()
 
 void assign_node::evaluate()
 {
-  float result = exp->evaluate().f; // Todo fix unsafety
+  Data result = exp->evaluate(); // Todo fix unsafety
 
   state[id] = result;
 }
@@ -65,4 +66,4 @@ void sequence_node::evaluate()
   stmt2->evaluate();
 }
 
-map<string, float> state;
+map<string, Data> state;

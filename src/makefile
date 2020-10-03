@@ -15,12 +15,12 @@ my-c.o: my-c.cpp my-c.h
 	${CCC} -c -std=gnu++17 my-c.cpp
 data.o: data.cpp data.h
 	${CCC} -c -std=gnu++17 data.cpp
-y.tab.o: my-c.yacc
-	${YACC} ${YFLAGS} my-c.yacc
+y.tab.o: my-c.y
+	${YACC} ${YFLAGS} my-c.y
 	${CCC} ${CCFLAGS} y.tab.c -c 
 
-lex.yy.o: my-c.lex
-	${LEX} $(LFLAGS) my-c.lex
+lex.yy.o: my-c.l
+	${LEX} $(LFLAGS) my-c.l
 	${CCC} ${CCFLAGS} lex.yy.c -c 
 
 clean:
