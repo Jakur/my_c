@@ -38,13 +38,13 @@ LETTER [a-zA-Z]
 %}
 
 print   { return PRINT; }
+{DIGIT}+[.]{DIGIT}* {
+	yylval.number = atof(yytext); return FLOAT;
+	}
 {DIGIT}+ {
-	yylval.number = atof(yytext); return NUMBER;
-	}
+        yylval.integer = atoi(yytext); return INTEGER;
+}
 
-{LETTER}[0-9a-zA-Z]* {
-        yylval.var_name = strdup(yytext); return ID;
-	}
 
 [ \t\f\r]	;		 // ignore white space 
 
@@ -57,10 +57,13 @@ print   { return PRINT; }
 ")"	{ return RPAREN; }
 "{"	{ return LBRACE; }
 "}"	{ return RBRACE; }
+"["     {return LSQUARE;}
+"]"     {return RSQUARE;}
 "="     { return EQUALS; }
 ";"    {return SEMICOLON;}
 
 "&&" {return AND;}
+"int" {return T_INT;}
 
 "pass" {return PASS;} // PASS RETURN IF THEN ELSE END WHILE DO
 "return" {return RETURN;}
@@ -71,6 +74,12 @@ print   { return PRINT; }
 "while" {return WHILE;}
 "do" {return DO;}
 "," {return COMMA;}
+"!" {return EXCLAM;}
+"end" {return END;}
+
+{LETTER}[0-9a-zA-Z]* {
+        yylval.var_name = strdup(yytext); return ID;
+	}
 
 . { BEGIN(ERROR); yymore(); }
 <ERROR>[^{DIGIT}{LETTER}+\-/*(){}= \t\n\f\r] { yymore(); }

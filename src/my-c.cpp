@@ -7,6 +7,18 @@
 
 using namespace std;
 
+void Pass::execute()
+{
+}
+
+int Fn::fn_call(void)
+{
+  for (int i = 0; i < stmts.size(); i++)
+  {
+    stmts[i]->execute();
+  }
+}
+
 Data VarExp::evaluate()
 {
   auto d = state[this->id];
@@ -23,7 +35,7 @@ void assign_node::print()
   exp->print();
 }
 
-void assign_node::evaluate()
+void assign_node::execute()
 {
   Data result = exp->evaluate(); // Todo fix unsafety
 
@@ -38,9 +50,9 @@ void print_node::print()
   exp->print();
 }
 
-void print_node::evaluate()
+void print_node::execute()
 {
-  cout << "output: " << exp->evaluate().f << endl // Todo fix unsafety
+  cout << "output: " << exp->evaluate().i << endl // Todo fix unsafety
        << endl;
 }
 

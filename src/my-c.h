@@ -4,6 +4,7 @@
 #include <map>
 #include <list>
 #include "data.h"
+#include <vector>
 
 using namespace std;
 
@@ -12,6 +13,23 @@ class Exp
 public:
   virtual Data evaluate(void) = 0;
   virtual void print(void) = 0;
+};
+
+struct Stmt
+{
+  virtual void execute(void) = 0;
+};
+
+struct Fn
+{
+  std::vector<Stmt *> stmts;
+  Fn(Stmt *s) : stmts(std::vector<Stmt *>{s}) {}
+  int fn_call(void);
+};
+
+struct Pass : Stmt
+{
+  void execute(void);
 };
 
 class BinaryExp : public Exp
@@ -67,7 +85,7 @@ public:
   virtual void evaluate() = 0;
 };
 
-class assign_node : public stmt_node
+class assign_node : public Stmt
 {
 protected:
   string id;
@@ -76,10 +94,10 @@ protected:
 public:
   assign_node(string name, Exp *expression);
   void print();
-  void evaluate();
+  void execute();
 };
 
-class print_node : public stmt_node
+class print_node : public Stmt
 {
 protected:
   Exp *exp;
@@ -87,7 +105,7 @@ protected:
 public:
   print_node(Exp *myexp);
   void print();
-  void evaluate();
+  void execute();
 };
 
 class skip_node : public stmt_node

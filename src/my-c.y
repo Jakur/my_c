@@ -30,6 +30,7 @@ using namespace std;
 
 // the root of the abstract syntax tree
  stmt_node *root;
+ Fn *main_fn;
 
 // for keeping track of line numbers in the program we are parsing
   int line_num = 1;
@@ -48,215 +49,222 @@ void yyerror(const char* s);
   char * var_name;
   Exp *exp_node_ptr;
   stmt_node *stmt_node_ptr;
+  Stmt *stmt_ptr;
+  Fn *fn;
 }
 
 %error-verbose
 
 %token <number> NUMBER
 %token <integer> INTEGER
+%token <number> FLOAT
 %token <var_name> ID
-%token SEMICOLON EQUALS PRINT PLUS MINUS TIMES DIVIDE LPAREN RPAREN LBRACE RBRACE
+%token SEMICOLON EQUALS PRINT PLUS MINUS TIMES DIVIDE LPAREN RPAREN LBRACE RBRACE LSQUARE RSQUARE
 %token AND
 %token PASS RETURN IF THEN ELSE END WHILE DO COMMA
-%type <exp_node_ptr> exp
-%type <exp_node_ptr> mulexp
-%type <exp_node_ptr> primexp 
-%type <stmt_node_ptr> stmtlist
-%type <stmt_node_ptr> stmt
-%type <stmt_node_ptr> program
-
+%token CHAR BOOL STRING EXCLAM
+%token T_INT T_FLOAT
+// New
+%type <stmt_ptr> stmts stmt var_dec asgn_stmt if_stmt while_stmt return_stmt print_stmt
+%type <exp_node_ptr> exp weak_exp strong_exp not_exp num_term func_invo array_index bool_term
+%type <fn> func_decl
 %%
 // New
-// program:
-//     func-decl
-//   | program func-decl
-// ;
-// stmts:
-//     stmt
-//   | stmt stmts
-// ;
-// stmt:
-//     PASS SEMICOLON
-//   | var-dec
-//   | asgn-stmt
-//   | if-stmt 
-//   | while-stmt 
-//   | return-stmt
-// ;
-// asgn-stmt:
-//   ID EQUALS exp
-// ;
-// // Types 
-// prim: 
-//   INTEGER 
-//   | FLOAT 
-//   | CHAR 
-//   | BOOL 
-//   | STRING
-// ;
-// type: 
-//   prim 
-//   | array-type
-// ;
+program:
+    func_decl {if (main_fn == nullptr) {main_fn = $1;}}
+;
+stmts:
+    stmt
+  | stmt stmts
+;
+stmt:
+    PASS SEMICOLON {new Pass();}
+  | var_dec
+  | asgn_stmt
+  | if_stmt 
+  | while_stmt 
+  | return_stmt
+  | print_stmt 
+;
 
-// dims: 
-//     LSQUARE exp RSQUARE
-//   | LSQUARE exp RSQUARE dims
-// ;
-// array-type: 
-//   prim dims
-// ;
-// array-index:
-//   ID dims
-// ;
+// Need some way to output
+print_stmt: 
+  PRINT exp SEMICOLON {$$ = new print_node($02);}
 
-// // Control Flow
-// if-stmt: 
-//   IF exp THEN stmts END 
-//   | IF exp THEN stmts ELSE stmts END
-// ;
-// while-stmt:
-//   WHILE exp DO stmts END
-// ;
+asgn_stmt:
+  ID EQUALS exp SEMICOLON {$$ = new assign_node($1, $3);}
+;
+// Types 
+prim: 
+  T_INT
+  | T_FLOAT
+;
+type: 
+  prim {}
+  | array_type {}
+;
 
-// // Operators and expressions
-// exp: 
-//   bool-term 
-//   | exp bool-op bool-term
-// ;
-// bool-op:
-//   AND
-// ;
-// bool-term:
-//   weak-exp 
-//   | bool-term weak-exp
-// ;
+dims: 
+    LSQUARE exp RSQUARE
+  | LSQUARE exp RSQUARE dims
+;
+array_type: 
+  prim dims
+;
+array_index:
+  ID dims {new LiteralExp(Data(0));}
+;
 
-// weak-exp:
-//   strong-exp
-//   | weak-exp weak-op strong-exp
-// ;
+// Control Flow
+if_stmt: 
+  IF exp THEN stmts END {new Pass();}
+  | IF exp THEN stmts ELSE stmts END {new Pass();}
+;
+while_stmt:
+  WHILE exp DO stmts END {new Pass();}
+;
 
-// weak-op:
-//   PLUS
-//   | MINUS
-// ;
+// Operators and expressions
+exp: 
+  bool_term 
+  | exp bool_op bool_term {new BinaryExp($01, BinaryOperator::ADD, $03);}
+;
+bool_op:
+  AND
+;
+bool_term:
+  weak_exp 
+  | bool_term weak_exp {new LiteralExp(0);}
+;
 
-// strong-exp:
-//   not-exp 
-//   | strong-exp strong-op not-exp 
-// ;
+weak_exp:
+  strong_exp
+  | weak_exp weak_op strong_exp {new BinaryExp($01, BinaryOperator::ADD, $03);}
+;
 
-// strong-op:
-//   TIMES
-//   | DIVIDE
-// ;
+weak_op:
+  PLUS
+  | MINUS
+;
 
-// not-exp:
-//   EXCLAM num-term
-//   | num-term
-// ;
+strong_exp:
+  not_exp 
+  | strong_exp strong_op not_exp {new BinaryExp($01, BinaryOperator::ADD, $03);}
+;
 
-// num-term:
-//   func-invo
-//   | array-index
-//   | LPAREN exp RPAREN
-//   | ID
-// ;
+strong_op:
+  TIMES
+  | DIVIDE
+;
 
-// // Var Dec 
-// var-dec:
-//   type declaration-list SEMICOLON 
-//   | type ID EQUALS LBRACE exp-list RBRACE SEMICOLON
-// ;
-// declaration-list:
-//   declaration 
-//   | declaration COMMA declaration-list
-// ;
-// declaration:
-//   ID
-//   | ID EQUALS exp
-// ;
+not_exp:
+  EXCLAM num_term {new LiteralExp(Data(0));}
+  | num_term
+;
 
-// // Functions
-// func-decl:
-//   type ID LPAREN RPAREN stmts END
-//   | type ID LPARER parameter-list RPAREN stmts END 
-// ;
-// parameter-list:
-//   type ID 
-//   | type ID COMMA parameter-list
-// ;
-// func-invo:
-//   ID LPAREN RPAREN
-//   | ID LPAREN exp-list RPAREN
-// ;
-// exp-list:
-//   exp
-//   | exp-list COMMA exp
-// ;
-// return-stmt:
-//   RETURN ID SEMICOLON 
-// ;
+num_term:
+  func_invo 
+  | array_index
+  | LPAREN exp RPAREN {$$ = $2;}
+  | ID {$$ = 0;}
+  | INTEGER {$$ = new LiteralExp(Data($1));}
+;
+
+// Var Dec 
+var_dec:
+  type declaration_list SEMICOLON {$$ = new Pass();}
+  | type ID EQUALS LBRACE exp_list RBRACE SEMICOLON {$$ = new Pass();}
+;
+declaration_list:
+  declaration 
+  | declaration COMMA declaration_list
+;
+declaration:
+  ID
+  | ID EQUALS exp
+;
+
+// Functions
+func_decl:
+  type ID LPAREN RPAREN stmts END {$$ = new Fn($05);}
+  | type ID LPAREN parameter_list RPAREN stmts END {} {$$ = new Fn($06);}
+;
+parameter_list:
+  type ID {} 
+  | type ID COMMA parameter_list {}
+;
+func_invo:
+  ID LPAREN RPAREN {}
+  | ID LPAREN exp_list RPAREN {}
+;
+exp_list:
+  exp {}
+  | exp_list COMMA exp {}
+;
+return_stmt:
+  RETURN ID SEMICOLON {}
+;
 
 
 // Old
-program: stmtlist { root = $$; }
-;
+// program: stmtlist { root = $$; }
+// ;
 
-stmtlist: stmtlist SEMICOLON stmt
-            { // copy up the list and add the stmt to it
-              $$ = new sequence_node($1,$3);
-            }
-         | stmtlist SEMICOLON error
-	   { // just copy up the stmtlist when an error occurs
-             $$ = $1;
-             yyclearin; } 
-         |  stmt 
-	 { $$ = $1;   }
-;
 
-stmt: ID EQUALS exp { 
-  $$ = new assign_node($1, $3);
-	   }
+
+// stmtlist: stmtlist SEMICOLON stmt
+//             { // copy up the list and add the stmt to it
+//               $$ = new sequence_node($1,$3);
+//             }
+//          | stmtlist SEMICOLON error
+// 	   { // just copy up the stmtlist when an error occurs
+//              $$ = $1;
+//              yyclearin; } 
+//          |  stmt 
+// 	 { $$ = $1;   }
+// ;
+
+// stmt: ID EQUALS exp { 
+//   $$ = new assign_node($1, $3);
+// 	   }
        
-| PRINT exp {
-  $$ = new print_node($2);
- }
+// | PRINT exp {
+//   $$ = new print_node($2);
+//  }
 
-|
-{ $$ = new skip_node();
-}
-| LBRACE stmtlist RBRACE { $$=$2; } 
- ;
-
-
-exp:	exp PLUS mulexp { $$ = new BinaryExp($1, BinaryOperator::ADD, $3); }
-
-      |	exp MINUS mulexp { $$ = new BinaryExp($1, BinaryOperator::SUB, $3); }
-
-      |	mulexp {  $$ = $1; }
-;
+// |
+// { $$ = new skip_node();
+// }
+// | LBRACE stmtlist RBRACE { $$=$2; } 
+//  ;
 
 
+// exp:	exp PLUS mulexp { $$ = new BinaryExp($1, BinaryOperator::ADD, $3); }
 
-mulexp:	mulexp TIMES primexp {
-	  $$ = new BinaryExp($1, BinaryOperator::MUL, $3); }
+//       |	exp MINUS mulexp { $$ = new BinaryExp($1, BinaryOperator::SUB, $3); }
 
-      | mulexp DIVIDE primexp {
-	  $$ = new BinaryExp($1, BinaryOperator::DIV, $3); }
-
-      | primexp { $$=$1;  }
-;
+//       |	mulexp {  $$ = $1; }
+// ;
 
 
-// Fix negation
-primexp:	LPAREN exp RPAREN  {  $$ = $2; }
 
-      |	NUMBER { $$ = new LiteralExp(Data($1)); }
+// mulexp:	mulexp TIMES primexp {
+// 	  $$ = new BinaryExp($1, BinaryOperator::MUL, $3); }
 
-      | ID { $$ = new VarExp($1); }
-;
+//       | mulexp DIVIDE primexp {
+// 	  $$ = new BinaryExp($1, BinaryOperator::DIV, $3); }
+
+//       | primexp { $$=$1;  }
+// ;
+
+
+// // Fix negation
+// primexp:	LPAREN exp RPAREN  {  $$ = $2; }
+
+//       |	NUMBER { $$ = new LiteralExp(Data($1)); }
+
+//       | ID { $$ = new VarExp($1); }
+// ;
  
 %%
 int main(int argc, char **argv)
@@ -267,13 +275,17 @@ int main(int argc, char **argv)
   yyparse();
 
   cout << "---------- list of input program------------" << endl << endl;
-
-  root -> print();
+  // root -> print();
 
   cout << "---------- execution of input program------------" << endl << endl;
-  
+  if (main_fn == nullptr) {
+    cout << "NULL MAIN" << endl;
+  } else {
+    cout << "LENGTH: " << main_fn->stmts.size() << endl;
+    main_fn->fn_call();
+  }
 
-  root->evaluate();
+  // root->evaluate();
   cout << "TESTING" << endl;
 }
 
