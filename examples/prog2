@@ -10,6 +10,7 @@ int main()
   
   //func call, I think the grammar is correct here
   int answer = search(v, n, [] a)
+  //i think this might be unecessary
   if answer != -1
     then return answer
     else return -1
@@ -21,7 +22,7 @@ int search(int v, int n, int [] a)
   while i != n
   do
     if a [i] == v
-      then return a [i];
+      then return i;
       else i = i + 1;
     end
   end
