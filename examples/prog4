@@ -8,7 +8,7 @@ int main()
   //calculates the sum of ints from 1 to n
   while (i <= n)
     sum = sum + i;
-    i = 1 + i;
+    i = i + 1;
   end
 	
   print sum;
