@@ -1,0 +1,16 @@
+int main()
+  
+  //initial values. n can be changed later to recieve an input if we opt to do so
+  int sum = 0;
+  int i = 1;
+  int n = 50;
+  
+  //calculates the sum of ints from 1 to n
+  while (i <= n)
+    sum = sum + i;
+    i = 1 + i;
+  end
+	
+  print sum;
+
+end
