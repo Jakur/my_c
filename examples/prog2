@@ -1,0 +1,29 @@
+int main()
+  //value v
+  int v = 4;
+  
+  //array length n
+  int n = 5;
+  
+  //I belive this is how we declare arrays with our grammar
+  int [] a = {1, 2, 3, 4, 5};
+  
+  //func call, I think the grammar is correct here
+  int answer = search(v, n, [] a)
+  if answer != -1
+    then return answer
+    else return -1
+  end
+end
+
+int search(int v, int n, int [] a)
+  int i = 0;
+  while i != n
+  do
+    if a [i] == v
+      then return a [i];
+      else i = i + 1;
+    end
+  end
+  return -1;
+end
