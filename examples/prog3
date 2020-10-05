@@ -1,17 +1,21 @@
 int main()
 
+  //initial values. not sure if we had a way to read an input
   x = 2;
   y = 4;
   z = 6;
-
+	
+	//print x if its largest number
 	if ( x >= y && x >= z )
 		print x;
 	end
 	
+	//print y if its the largest number
 	if ( y >= x && y >= z)
 		print y;
 	end
 	
+	//print z if it the largest number
 	if (z >= x && z >= y)
 		print z;
 	end
