@@ -1,25 +1,12 @@
 %{
 
 
-/* This interpreter evaluates arithmetic expressions and assigns
-   them to the specified variable names. The grammar is:
-
-   pgm -> stmtlist
-   stmtlist -> stmt | stmtlist ; stmt
-   stmt -> id = exp 
-        |  print id
-   exp -> exp + mulexp | exp - mulexp 
-   mulexp -> mulexp * primexp | mulexp / primexp
-   primexp ->  ( exp ) | ( exp ) | - primexp | id | number 
-*/
-
 #include <iostream>
 #include <string>
 #include <stdlib.h>
 #include <stdio.h>
 #include <map>
 #include <list>
-#include <optional>
 #include "my-c.h"
 
 
@@ -28,8 +15,7 @@ using namespace std;
 
  extern FILE *yyin;
 
-// the root of the abstract syntax tree
- stmt_node *root;
+// the entry point of execution
  Fn *main_fn;
 
 // for keeping track of line numbers in the program we are parsing
@@ -96,10 +82,10 @@ stmt:
 
 // Need some way to output
 print_stmt: 
-  PRINT exp SEMICOLON {$$ = new print_node($02);}
+  PRINT exp SEMICOLON {$$ = new PrintStmt($02);}
 
 asgn_stmt:
-  ID EQUALS exp SEMICOLON {$$ = new assign_node($1, $3);}
+  ID EQUALS exp SEMICOLON {$$ = new AssignStmt($01, $03);}
 ;
 // Types 
 prim: 
@@ -283,9 +269,6 @@ int main(int argc, char **argv)
 
   //  yydebug = 1;
   yyparse();
-  // int i = 0;
-  // auto x = "x";
-  // state.insert((x, Data(i)));
 
   cout << "---------- list of input program------------" << endl << endl;
   // root -> print();

@@ -42,6 +42,29 @@ struct Pass : Stmt
   void print(void);
 };
 
+class AssignStmt : public Stmt
+{
+protected:
+  string id;
+  Exp *exp;
+
+public:
+  AssignStmt(string name, Exp *expression);
+  void print();
+  void execute();
+};
+
+class PrintStmt : public Stmt
+{
+protected:
+  Exp *exp;
+
+public:
+  PrintStmt(Exp *myexp);
+  void print();
+  void execute();
+};
+
 class BinaryExp : public Exp
 {
 public:
@@ -86,55 +109,6 @@ public:
   VarExp(std::string id) : id({id}) {}
   Data evaluate(void);
   void print(void) { cout << this->id; };
-};
-
-class stmt_node
-{
-public:
-  virtual void print() {}
-  virtual void evaluate() = 0;
-};
-
-class assign_node : public Stmt
-{
-protected:
-  string id;
-  Exp *exp;
-
-public:
-  assign_node(string name, Exp *expression);
-  void print();
-  void execute();
-};
-
-class print_node : public Stmt
-{
-protected:
-  Exp *exp;
-
-public:
-  print_node(Exp *myexp);
-  void print();
-  void execute();
-};
-
-class skip_node : public stmt_node
-{
-public:
-  skip_node();
-  void print();
-  void evaluate();
-};
-
-class sequence_node : public stmt_node
-{
-protected:
-  stmt_node *stmt1, *stmt2;
-
-public:
-  sequence_node(stmt_node *mystmt1, stmt_node *mystmt2);
-  void print();
-  void evaluate();
 };
 
 // the object at the base of our tree
