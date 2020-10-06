@@ -1,3 +1,5 @@
-x=12;
-y=13;
-print x*y;
+int main()
+	int x;
+	x = 45;
+	print x;
+end

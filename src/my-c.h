@@ -4,6 +4,7 @@
 #include <map>
 #include <list>
 #include "data.h"
+#include <vector>
 
 using namespace std;
 
@@ -12,6 +13,56 @@ class Exp
 public:
   virtual Data evaluate(void) = 0;
   virtual void print(void) = 0;
+};
+
+struct Stmt
+{
+  virtual void execute(void) = 0;
+  virtual void print(void) = 0;
+};
+
+struct MultiStmt : Stmt
+{
+  std::vector<Stmt *> stmts;
+  void execute(void);
+  void print(void);
+  MultiStmt(Stmt *s) : stmts(std::vector<Stmt *>{s}) {}
+};
+
+struct Fn
+{
+  MultiStmt *stmts;
+  Fn(MultiStmt *s) : stmts(s) {}
+  int fn_call(void);
+};
+
+struct Pass : Stmt
+{
+  void execute(void);
+  void print(void);
+};
+
+class AssignStmt : public Stmt
+{
+protected:
+  string id;
+  Exp *exp;
+
+public:
+  AssignStmt(string name, Exp *expression);
+  void print();
+  void execute();
+};
+
+class PrintStmt : public Stmt
+{
+protected:
+  Exp *exp;
+
+public:
+  PrintStmt(Exp *myexp);
+  void print();
+  void execute();
 };
 
 class BinaryExp : public Exp
@@ -33,7 +84,7 @@ public:
     Data b = right->evaluate();
     return a.apply(&b, this->op);
   };
-  void print(void){};
+  void print(void) { cout << "TODO"; };
 };
 
 class LiteralExp : public Exp
@@ -45,69 +96,20 @@ public:
   {
     return this->value;
   }
-  void print(void){};
+  void print(void)
+  {
+    value.print();
+  };
 };
 
 class VarExp : public Exp
 {
 public:
   std::string id;
-  VarExp(std::string id)
-  {
-    this->id = id;
-  }
+  VarExp(std::string id) : id({id}) {}
   Data evaluate(void);
-  void print(void){};
-};
-
-class stmt_node
-{
-public:
-  virtual void print() {}
-  virtual void evaluate() = 0;
-};
-
-class assign_node : public stmt_node
-{
-protected:
-  string id;
-  Exp *exp;
-
-public:
-  assign_node(string name, Exp *expression);
-  void print();
-  void evaluate();
-};
-
-class print_node : public stmt_node
-{
-protected:
-  Exp *exp;
-
-public:
-  print_node(Exp *myexp);
-  void print();
-  void evaluate();
-};
-
-class skip_node : public stmt_node
-{
-public:
-  skip_node();
-  void print();
-  void evaluate();
-};
-
-class sequence_node : public stmt_node
-{
-protected:
-  stmt_node *stmt1, *stmt2;
-
-public:
-  sequence_node(stmt_node *mystmt1, stmt_node *mystmt2);
-  void print();
-  void evaluate();
+  void print(void) { cout << this->id; };
 };
 
 // the object at the base of our tree
-extern map<string, float> state;
+extern map<string, Data> state;
