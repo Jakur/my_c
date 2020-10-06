@@ -1,3 +1,5 @@
 int main()
-	print 42;
+	int x;
+	x = 45;
+	print x;
 end

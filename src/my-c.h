@@ -18,18 +18,28 @@ public:
 struct Stmt
 {
   virtual void execute(void) = 0;
+  virtual void print(void) = 0;
+};
+
+struct MultiStmt : Stmt
+{
+  std::vector<Stmt *> stmts;
+  void execute(void);
+  void print(void);
+  MultiStmt(Stmt *s) : stmts(std::vector<Stmt *>{s}) {}
 };
 
 struct Fn
 {
-  std::vector<Stmt *> stmts;
-  Fn(Stmt *s) : stmts(std::vector<Stmt *>{s}) {}
+  MultiStmt *stmts;
+  Fn(MultiStmt *s) : stmts(s) {}
   int fn_call(void);
 };
 
 struct Pass : Stmt
 {
   void execute(void);
+  void print(void);
 };
 
 class BinaryExp : public Exp
@@ -51,7 +61,7 @@ public:
     Data b = right->evaluate();
     return a.apply(&b, this->op);
   };
-  void print(void){};
+  void print(void) { cout << "TODO"; };
 };
 
 class LiteralExp : public Exp
@@ -63,19 +73,19 @@ public:
   {
     return this->value;
   }
-  void print(void){};
+  void print(void)
+  {
+    value.print();
+  };
 };
 
 class VarExp : public Exp
 {
 public:
   std::string id;
-  VarExp(std::string id)
-  {
-    this->id = id;
-  }
+  VarExp(std::string id) : id({id}) {}
   Data evaluate(void);
-  void print(void){};
+  void print(void) { cout << this->id; };
 };
 
 class stmt_node

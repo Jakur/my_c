@@ -37,6 +37,7 @@ public:
     Data(float f);
     Data();
     Data apply(Data *other, BinaryOperator op);
+    void print();
 };
 
 template <class T>
@@ -56,3 +57,5 @@ T num_op(T left, BinaryOperator op, T right)
         return left; // Todo finish operations
     }
 }
+
+// std::ostream &operator<<(std::ostream &os, Data const &m);

@@ -10,20 +10,46 @@ using namespace std;
 void Pass::execute()
 {
 }
+void Pass::print()
+{
+  cout << "pass" << endl;
+}
 
 int Fn::fn_call(void)
 {
-  for (int i = 0; i < stmts.size(); i++)
+  cout << "Calling Fn" << endl;
+  for (int i = stmts->stmts.size() - 1; i >= 0; i--)
   {
-    stmts[i]->execute();
+    auto x = stmts->stmts[i];
+    if (x == nullptr)
+    {
+      cout << "NULL STMT!";
+      return -1;
+    }
+    x->execute();
   }
+  return 0;
 }
 
 Data VarExp::evaluate()
 {
-  auto d = state[this->id];
-  // float f = d.f; // Todo fix the state map
+  auto d = state.at(this->id);
   return Data(d);
+}
+
+void MultiStmt::execute()
+{
+  for (int i = 0; i < this->stmts.size(); i++)
+  {
+    this->stmts[i]->execute();
+  }
+}
+void MultiStmt::print()
+{
+  for (int i = 0; i < this->stmts.size(); i++)
+  {
+    this->stmts[i]->print();
+  }
 }
 
 assign_node::assign_node(std::string name, Exp *expression)
@@ -33,6 +59,7 @@ void assign_node::print()
 {
   cout << id << " = ";
   exp->print();
+  cout << endl;
 }
 
 void assign_node::execute()
@@ -48,11 +75,12 @@ void print_node::print()
 {
   cout << "print ";
   exp->print();
+  cout << endl;
 }
 
 void print_node::execute()
 {
-  cout << "output: " << exp->evaluate().i << endl // Todo fix unsafety
+  cout << "PRINTING: " << exp->evaluate().i << endl // Todo fix unsafety
        << endl;
 }
 

@@ -48,8 +48,8 @@ void yyerror(const char* s);
   int integer;
   char * var_name;
   Exp *exp_node_ptr;
-  stmt_node *stmt_node_ptr;
   Stmt *stmt_ptr;
+  MultiStmt *multi_stmt;
   Fn *fn;
 }
 
@@ -65,7 +65,8 @@ void yyerror(const char* s);
 %token CHAR BOOL STRING EXCLAM
 %token T_INT T_FLOAT
 // New
-%type <stmt_ptr> stmts stmt var_dec asgn_stmt if_stmt while_stmt return_stmt print_stmt
+%type <stmt_ptr> stmt var_dec asgn_stmt if_stmt while_stmt return_stmt print_stmt
+%type <multi_stmt> stmts
 %type <exp_node_ptr> exp weak_exp strong_exp not_exp num_term func_invo array_index bool_term
 %type <fn> func_decl
 %%
@@ -74,8 +75,14 @@ program:
     func_decl {if (main_fn == nullptr) {main_fn = $1;}}
 ;
 stmts:
-    stmt
-  | stmt stmts
+    stmt {$$ = new MultiStmt($01);}
+  | stmt stmts {
+    MultiStmt *s = $02;
+    auto next = $01;
+    next->print(); 
+    s->stmts.push_back(next);
+    $$ = s;
+  }
 ;
 stmt:
     PASS SEMICOLON {new Pass();}
@@ -166,8 +173,11 @@ num_term:
   func_invo 
   | array_index
   | LPAREN exp RPAREN {$$ = $2;}
-  | ID {$$ = 0;}
-  | INTEGER {$$ = new LiteralExp(Data($1));}
+  | ID {$$ = new VarExp($01);}
+  | INTEGER {
+    int x = $01;
+    $$ = new LiteralExp(Data(x));
+    }
 ;
 
 // Var Dec 
@@ -273,6 +283,9 @@ int main(int argc, char **argv)
 
   //  yydebug = 1;
   yyparse();
+  // int i = 0;
+  // auto x = "x";
+  // state.insert((x, Data(i)));
 
   cout << "---------- list of input program------------" << endl << endl;
   // root -> print();
@@ -281,12 +294,11 @@ int main(int argc, char **argv)
   if (main_fn == nullptr) {
     cout << "NULL MAIN" << endl;
   } else {
-    cout << "LENGTH: " << main_fn->stmts.size() << endl;
+    cout << "main() statement count: " << main_fn->stmts->stmts.size() << endl;
     main_fn->fn_call();
   }
 
-  // root->evaluate();
-  cout << "TESTING" << endl;
+  cout << "Finished Testing" << endl;
 }
 
 void yyerror(const char * s)
