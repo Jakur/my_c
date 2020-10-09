@@ -1,3 +1,58 @@
 int main()
-	print 42;
+	//Using all data types
+	int a = 42;
+	float b = 1.01;
+	char c = c;
+	bool d = true;
+	string e = helloworld;
+	int [] f = {1};
+	
+	//printing variables
+	print a;
+	print b;
+	print c;
+	print d;
+	print e;
+	print f [0];
+	
+	//testing all booleans and if else statements
+	if 1 && 0
+		then print true;
+		else print false;
+	end
+	
+	if 1 || 0
+		then print true;
+		else print false;
+	end
+	
+	if 1 < 0
+		then print true;
+		else print false;
+	end
+
+	if 1 <= 0
+		then print true;
+		else print false;
+	end
+	
+	if 1 > 0
+		then print true;
+		else print false;
+	end
+	
+	if 1 >= 0
+		then print true;
+		else print false;
+	end
+	
+	if 1 == 0
+		then print true;
+		else print false;
+	end
+	
+	if 1 != 0
+		then print true;
+		else print false;
+	end
 end
