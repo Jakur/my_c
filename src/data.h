@@ -51,22 +51,22 @@ T num_op(T left, BinaryOperator op, T right)
         return left * right;
     case BinaryOperator::DIV:
         return left / right;
-	case BinaryOperator::AND:
-		return left && right;
-	case BinaryOperator::OR:
-		return left || right;
-	case BinaryOperator::LTHAN:
-		return left < right;
-	case BinaryOperator::LETHAN:
-		return left <= right;
-	case BinaryOperator::GTHAN:
-		return left > right;
-	case BinaryOperator::GETHAN:
-		return left >= right;
-	case BinaryOperator::EQ:
-		return left == right;
-	case BinaryOperator::NEQ:
-		return left != right;
+    case BinaryOperator::AND:
+	return left && right;
+    case BinaryOperator::OR:
+	return left || right;
+    case BinaryOperator::LTHAN:
+	return left < right;
+    case BinaryOperator::LETHAN:
+	return left <= right;
+    case BinaryOperator::GTHAN:
+	return left > right;
+    case BinaryOperator::GETHAN:
+	return left >= right;
+    case BinaryOperator::EQ:
+	return left == right;
+    case BinaryOperator::NEQ:
+	return left != right;
     default:
         return left; 
     }
