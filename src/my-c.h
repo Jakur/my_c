@@ -122,5 +122,14 @@ public:
   void print(void) { cout << this->id; };
 };
 
+//Array Class declaration
+class ArrayExp : Exp
+{
+public:
+  virtual Data evaluate(void) = 0;
+  virtual void print(void) = 0;
+  bool to_bool(void);
+}
+
 // the object at the base of our tree
 extern map<string, Data> state;
