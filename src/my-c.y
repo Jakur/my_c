@@ -51,6 +51,7 @@ BinaryOperator get_op(int x);
 %token <var_name> ID
 %token PLUS MINUS TIMES DIVIDE AND OR 
 %token SEMICOLON EQUALS PRINT LPAREN RPAREN LBRACE RBRACE LSQUARE RSQUARE
+%token LESSTHAN LESSTHANE GREATTHAN GREATTHANE NOTEQUAL EQUALTO;
 %token PASS RETURN IF THEN ELSE END WHILE DO COMMA
 %token STRING EXCLAM
 %token T_INT T_FLOAT T_BOOL T_CHAR T_STRING
@@ -133,6 +134,12 @@ exp:
 bool_op:
   AND {$$ = AND;}
   | OR {$$ = OR;}
+  | LESSTHAN {$$ = LESSTHAN;}
+  | LESSTHANE {$$ = LESSTHANE;}
+  | GREATTHAN {$$ = GREATTHAN;}
+  | GREATTHANE {$$ = GREATTHANE;}
+  | NOTEQUAL {$$ = NOTEQUAL;}
+  | EQUALTO {$$ = EQUALTO;}
 ;
 weak_exp:
   strong_exp
@@ -310,6 +317,12 @@ BinaryOperator get_op(int x) {
     case DIVIDE: return BinaryOperator::DIV;
     case AND: return BinaryOperator::BAND;
     case OR: return BinaryOperator::BOR;
+    case LESSTHAN: return BinaryOperator::LTHAN;
+    case LESSTHANE: return BinaryOperator::LETHAN;
+    case GREATTHAN: return BinaryOperator::GTHAN;
+    case GREATTHANE: return BinaryOperator::GETHAN;
+    case NOTEQUAL: return BinaryOperator::NEQ;
+    case EQUALTO: return BinaryOperator::EQ;
   }
   cout << "Unknown binary operator with number " << x << endl;
   return BinaryOperator::ADD; 

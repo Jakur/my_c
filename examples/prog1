@@ -1,7 +1,6 @@
 int main()
-	int x = 6, y = 7;
-	bool b;
-	b = false;
-	if b then print x + y; else print x - y; end
-	print x * y;
+	int x = 6, y = 7, z = -1;
+	bool b = x > y;
+	if b then print x - y; else print y - x; end
+	if (x / y) == 1 then print x - y; else print y - x; end
 end

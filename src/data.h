@@ -42,39 +42,13 @@ public:
     Data(float f);
     Data(bool b);
     Data();
+    Data to_bool(bool b);
     Data apply(Data *other, BinaryOperator op);
     void print();
 };
 
 Data bool_op(bool left, BinaryOperator op, bool right);
-
-template <class T>
-Data num_op(T left, BinaryOperator op, T right)
-{
-    switch (op)
-    {
-    case BinaryOperator::ADD:
-        return Data(left + right);
-    case BinaryOperator::SUB:
-        return Data(left - right);
-    case BinaryOperator::MUL:
-        return Data(left * right);
-    case BinaryOperator::DIV:
-        return Data(left / right);
-    case BinaryOperator::LTHAN:
-        return Data(left < right);
-    case BinaryOperator::LETHAN:
-        return Data(left <= right);
-    case BinaryOperator::GTHAN:
-        return Data(left > right);
-    case BinaryOperator::GETHAN:
-        return Data(left >= right);
-    case BinaryOperator::EQ:
-        return Data(left == right);
-    case BinaryOperator::NEQ:
-        return Data(left != right);
-    }
-    return Data(left);
-}
+Data num_op(int left, BinaryOperator op, int right);
+Data num_op(float left, BinaryOperator op, float right);
 
 // std::ostream &operator<<(std::ostream &os, Data const &m);

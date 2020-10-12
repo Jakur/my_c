@@ -38,10 +38,10 @@ LETTER [a-zA-Z]
 %}
 
 print   { return PRINT; }
-{DIGIT}+[.]{DIGIT}* {
+[-]?{DIGIT}+[.]{DIGIT}* {
 	yylval.number = atof(yytext); return FLOAT;
 	}
-{DIGIT}+ {
+[-]?{DIGIT}+ {
         yylval.integer = atoi(yytext); return INTEGER;
 }
 "true" {yylval.boolean = true; return BOOL;}
@@ -50,6 +50,15 @@ print   { return PRINT; }
 
 
 [ \t\f\r]	;		 // ignore white space 
+
+"&&" {return AND;}
+"||" {return OR;}
+"<" {return LESSTHAN;}
+"<=" {return LESSTHANE;}
+">" {return GREATTHAN;}
+">=" {return GREATTHANE;}
+"!=" {return NOTEQUAL;}
+"==" {return EQUALTO;}
 
 \n      { line_num++; }
 "-"	{ return MINUS;  }
@@ -65,8 +74,6 @@ print   { return PRINT; }
 "="     { return EQUALS; }
 ";"    {return SEMICOLON;}
 
-"&&" {return AND;}
-"||" {return OR;}
 "int" {return T_INT;}
 "float" {return T_FLOAT;}
 "bool" {return T_BOOL;}

@@ -14,6 +14,8 @@ bool Exp::to_bool()
   {
     return d.b;
   }
+  int i = d.i;
+  std::cout << "Expected boolean got " << i << endl;
   std::cout << "Implicit conversion of boolean to false";
   return false;
 }

@@ -6,6 +6,10 @@ Data::Data(bool b) : tag{Data::BOOL}, b{b} {}
 Data::Data(int i) : tag{Data::INT}, i{i} {}
 Data::Data(float f) : tag{Data::FLOAT}, f{f} {}
 Data::Data() : Data(0) {}
+Data Data::to_bool(bool b)
+{
+    return Data(b);
+}
 Data Data::apply(Data *other, BinaryOperator op)
 {
     if (this->tag == other->tag)
@@ -19,6 +23,10 @@ Data Data::apply(Data *other, BinaryOperator op)
         case Data::FLOAT:
         {
             return num_op(this->f, op, other->f);
+        }
+        case Data::BOOL:
+        {
+            return bool_op(this->b, op, other->b);
         }
         }
     }
@@ -54,6 +62,62 @@ Data bool_op(bool left, BinaryOperator op, bool right)
         return Data(left || right);
     }
     return false;
+}
+
+Data num_op(int left, BinaryOperator op, int right)
+{
+    switch (op)
+    {
+    case BinaryOperator::ADD:
+        return Data(left + right);
+    case BinaryOperator::SUB:
+        return Data(left - right);
+    case BinaryOperator::MUL:
+        return Data(left * right);
+    case BinaryOperator::DIV:
+        return Data(left / right);
+    case BinaryOperator::LTHAN:
+        return Data(left < right);
+    case BinaryOperator::LETHAN:
+        return Data(left <= right);
+    case BinaryOperator::GTHAN:
+        return Data(left > right);
+    case BinaryOperator::GETHAN:
+        return Data(left >= right);
+    case BinaryOperator::EQ:
+        return Data(left == right);
+    case BinaryOperator::NEQ:
+        return Data(left != right);
+    }
+    return Data(left);
+}
+
+Data num_op(float left, BinaryOperator op, float right)
+{
+    switch (op)
+    {
+    case BinaryOperator::ADD:
+        return Data(left + right);
+    case BinaryOperator::SUB:
+        return Data(left - right);
+    case BinaryOperator::MUL:
+        return Data(left * right);
+    case BinaryOperator::DIV:
+        return Data(left / right);
+    case BinaryOperator::LTHAN:
+        return Data(left < right);
+    case BinaryOperator::LETHAN:
+        return Data(left <= right);
+    case BinaryOperator::GTHAN:
+        return Data(left > right);
+    case BinaryOperator::GETHAN:
+        return Data(left >= right);
+    case BinaryOperator::EQ:
+        return Data(left == right);
+    case BinaryOperator::NEQ:
+        return Data(left != right);
+    }
+    return Data(left);
 }
 
 // std::ostream &operator<<(std::ostream &os, Data const &m)
