@@ -1,8 +1,5 @@
 int main()
-	int x;
-	x = 6;
-	int y;
-	y = 7;
+	int x = 6, y = 7;
 	bool b;
 	b = false;
 	if b then print x + y; else print x - y; end

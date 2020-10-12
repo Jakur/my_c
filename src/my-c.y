@@ -56,9 +56,9 @@ BinaryOperator get_op(int x);
 %token T_INT T_FLOAT T_BOOL T_CHAR T_STRING
 // New
 %type <integer> bool_op weak_op strong_op
-%type <stmt_ptr> stmt var_dec asgn_stmt if_stmt while_stmt return_stmt print_stmt
-%type <multi_stmt> stmts
-%type <exp_node_ptr> exp weak_exp strong_exp not_exp num_term func_invo array_index bool_term
+%type <stmt_ptr> stmt var_dec asgn_stmt if_stmt while_stmt return_stmt print_stmt declaration
+%type <multi_stmt> stmts declaration_list
+%type <exp_node_ptr> exp weak_exp strong_exp not_exp num_term func_invo array_index
 %type <fn> func_decl
 %%
 // New
@@ -180,16 +180,22 @@ num_term:
 
 // Var Dec 
 var_dec:
-  type declaration_list SEMICOLON {$$ = new Pass();}
+  type declaration_list SEMICOLON {$$ = $02;}
   | type ID EQUALS LBRACE exp_list RBRACE SEMICOLON {$$ = new Pass();}
-;
+; 
 declaration_list:
-  declaration 
-  | declaration COMMA declaration_list
+  declaration {$$ = new MultiStmt($01);}
+  | declaration COMMA declaration_list {
+    MultiStmt *s = $03;
+    auto next = $01;
+    next->print(); 
+    s->stmts.push_back(next);
+    $$ = s;
+  }
 ;
 declaration:
-  ID
-  | ID EQUALS exp
+  ID {$$ = new Pass();}
+  | ID EQUALS exp {$$ = new AssignStmt($01, $03);}
 ;
 
 // Functions
