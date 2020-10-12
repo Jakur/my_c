@@ -24,6 +24,7 @@ using namespace std;
 // function prototypes, we need the yylex return prototype so C++ won't complain
 int yylex();
 void yyerror(const char* s);
+BinaryOperator get_op(int x);
 
 %}
 
@@ -32,6 +33,8 @@ void yyerror(const char* s);
 %union {
   float number;
   int integer;
+  bool boolean;
+  char character;
   char * var_name;
   Exp *exp_node_ptr;
   Stmt *stmt_ptr;
@@ -39,18 +42,20 @@ void yyerror(const char* s);
   Fn *fn;
 }
 
-%error-verbose
+// %define parse.error verbose
 
-%token <number> NUMBER
 %token <integer> INTEGER
 %token <number> FLOAT
+%token <boolean> BOOL
+%token <character> CHAR
 %token <var_name> ID
-%token SEMICOLON EQUALS PRINT PLUS MINUS TIMES DIVIDE LPAREN RPAREN LBRACE RBRACE LSQUARE RSQUARE
-%token AND
+%token PLUS MINUS TIMES DIVIDE AND OR 
+%token SEMICOLON EQUALS PRINT LPAREN RPAREN LBRACE RBRACE LSQUARE RSQUARE
 %token PASS RETURN IF THEN ELSE END WHILE DO COMMA
-%token CHAR BOOL STRING EXCLAM
-%token T_INT T_FLOAT
+%token STRING EXCLAM
+%token T_INT T_FLOAT T_BOOL T_CHAR T_STRING
 // New
+%type <integer> bool_op weak_op strong_op
 %type <stmt_ptr> stmt var_dec asgn_stmt if_stmt while_stmt return_stmt print_stmt
 %type <multi_stmt> stmts
 %type <exp_node_ptr> exp weak_exp strong_exp not_exp num_term func_invo array_index bool_term
@@ -71,7 +76,7 @@ stmts:
   }
 ;
 stmt:
-    PASS SEMICOLON {new Pass();}
+    PASS SEMICOLON {$$ = new Pass();}
   | var_dec
   | asgn_stmt
   | if_stmt 
@@ -91,6 +96,9 @@ asgn_stmt:
 prim: 
   T_INT
   | T_FLOAT
+  | T_BOOL
+  | T_CHAR
+  | T_STRING
 ;
 type: 
   prim {}
@@ -110,44 +118,40 @@ array_index:
 
 // Control Flow
 if_stmt: 
-  IF exp THEN stmts END {new Pass();}
-  | IF exp THEN stmts ELSE stmts END {new Pass();}
+  IF exp THEN stmts END {$$ = new IfStmt($02, $04, nullptr);}
+  | IF exp THEN stmts ELSE stmts END {$$ = new IfStmt($02, $04, $06);}
 ;
 while_stmt:
-  WHILE exp DO stmts END {new Pass();}
+  WHILE exp DO stmts END {$$ = new Pass();}
 ;
 
 // Operators and expressions
 exp: 
-  bool_term 
-  | exp bool_op bool_term {new BinaryExp($01, BinaryOperator::ADD, $03);}
+  weak_exp 
+  | exp bool_op weak_exp {$$ = new BinaryExp($01, get_op($02), $03);}
 ;
 bool_op:
-  AND
+  AND {$$ = AND;}
+  | OR {$$ = OR;}
 ;
-bool_term:
-  weak_exp 
-  | bool_term weak_exp {new LiteralExp(0);}
-;
-
 weak_exp:
   strong_exp
-  | weak_exp weak_op strong_exp {new BinaryExp($01, BinaryOperator::ADD, $03);}
+  | weak_exp weak_op strong_exp {$$ = new BinaryExp($01, get_op($02), $03);}
 ;
 
 weak_op:
-  PLUS
-  | MINUS
+  PLUS {$$ = PLUS;}
+  | MINUS {$$ = MINUS;}
 ;
 
 strong_exp:
   not_exp 
-  | strong_exp strong_op not_exp {new BinaryExp($01, BinaryOperator::ADD, $03);}
+  | strong_exp strong_op not_exp {$$ = new BinaryExp($01, get_op($02), $03);}
 ;
 
 strong_op:
-  TIMES
-  | DIVIDE
+  TIMES {$$ = TIMES;}
+  | DIVIDE {$$ = DIVIDE;}
 ;
 
 not_exp:
@@ -158,12 +162,20 @@ not_exp:
 num_term:
   func_invo 
   | array_index
-  | LPAREN exp RPAREN {$$ = $2;}
+  | LPAREN exp RPAREN {$$ = $02;}
   | ID {$$ = new VarExp($01);}
   | INTEGER {
     int x = $01;
     $$ = new LiteralExp(Data(x));
     }
+  | FLOAT {
+    float f = $01;
+    $$ = new LiteralExp(Data(f));
+  }
+  | BOOL {
+    bool b = $01;
+    $$ = new LiteralExp(Data(b));
+  }
 ;
 
 // Var Dec 
@@ -282,6 +294,19 @@ int main(int argc, char **argv)
   }
 
   cout << "Finished Testing" << endl;
+}
+
+BinaryOperator get_op(int x) {
+  switch (x) {
+    case MINUS: return BinaryOperator::SUB;
+    case PLUS: return BinaryOperator::ADD;
+    case TIMES: return BinaryOperator::MUL;
+    case DIVIDE: return BinaryOperator::DIV;
+    case AND: return BinaryOperator::BAND;
+    case OR: return BinaryOperator::BOR;
+  }
+  cout << "Unknown binary operator with number " << x << endl;
+  return BinaryOperator::ADD; 
 }
 
 void yyerror(const char * s)

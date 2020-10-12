@@ -1,4 +1,5 @@
 #include <string>
+#include <map>
 
 enum class BinaryOperator
 {
@@ -6,14 +7,18 @@ enum class BinaryOperator
     DIV,
     ADD,
     SUB,
-    AND,
-    OR,
+    BAND,
+    BOR,
     LTHAN,
     LETHAN,
     GTHAN,
     GETHAN,
     EQ,
     NEQ
+};
+
+class VarStorage
+{
 };
 
 class Data
@@ -23,53 +28,53 @@ public:
     {
         INT,
         CHAR,
+        BOOL,
         FLOAT,
     } tag;
     union {
         int i;
         char c;
         float f;
+        bool b;
     };
     Data(int i);
     Data(char c);
     Data(float f);
+    Data(bool b);
     Data();
     Data apply(Data *other, BinaryOperator op);
     void print();
 };
 
+Data bool_op(bool left, BinaryOperator op, bool right);
+
 template <class T>
-T num_op(T left, BinaryOperator op, T right)
+Data num_op(T left, BinaryOperator op, T right)
 {
     switch (op)
     {
     case BinaryOperator::ADD:
-        return left + right;
+        return Data(left + right);
     case BinaryOperator::SUB:
-        return left - right;
+        return Data(left - right);
     case BinaryOperator::MUL:
-        return left * right;
+        return Data(left * right);
     case BinaryOperator::DIV:
-        return left / right;
-    case BinaryOperator::AND:
-	return left && right;
-    case BinaryOperator::OR:
-	return left || right;
+        return Data(left / right);
     case BinaryOperator::LTHAN:
-	return left < right;
+        return Data(left < right);
     case BinaryOperator::LETHAN:
-	return left <= right;
+        return Data(left <= right);
     case BinaryOperator::GTHAN:
-	return left > right;
+        return Data(left > right);
     case BinaryOperator::GETHAN:
-	return left >= right;
+        return Data(left >= right);
     case BinaryOperator::EQ:
-	return left == right;
+        return Data(left == right);
     case BinaryOperator::NEQ:
-	return left != right;
-    default:
-        return left; 
+        return Data(left != right);
     }
+    return Data(left);
 }
 
 // std::ostream &operator<<(std::ostream &os, Data const &m);
