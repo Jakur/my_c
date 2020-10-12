@@ -1,0 +1,5 @@
+src/.vscode/*
+src/*.o
+src/lex.yy.c
+src/my-c
+src/y.tab.*

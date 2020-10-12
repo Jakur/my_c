@@ -2,6 +2,7 @@
 #include "stdio.h"
 #include "iostream"
 
+Data::Data(bool b) : tag{Data::BOOL}, b{b} {}
 Data::Data(int i) : tag{Data::INT}, i{i} {}
 Data::Data(float f) : tag{Data::FLOAT}, f{f} {}
 Data::Data() : Data(0) {}
@@ -13,19 +14,18 @@ Data Data::apply(Data *other, BinaryOperator op)
         {
         case Data::INT:
         {
-            int res = num_op(this->i, op, other->i);
-            return Data(res);
+            return num_op(this->i, op, other->i);
         }
         case Data::FLOAT:
         {
-            float res = num_op(this->f, op, other->f);
-            return Data(res);
+            return num_op(this->f, op, other->f);
         }
         }
     }
 
     else
     {
+        std::cout << "Cannot implicitly convert " << this->tag << " to " << other->tag << std::endl;
         // Todo implicit casting?
     }
     return Data(0);
@@ -42,6 +42,18 @@ void Data::print()
         std::cout << this->f;
         break;
     }
+}
+
+Data bool_op(bool left, BinaryOperator op, bool right)
+{
+    switch (op)
+    {
+    case BinaryOperator::BAND:
+        return Data(left && right);
+    case BinaryOperator::BOR:
+        return Data(left || right);
+    }
+    return false;
 }
 
 // std::ostream &operator<<(std::ostream &os, Data const &m)

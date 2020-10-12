@@ -7,6 +7,17 @@
 
 using namespace std;
 
+bool Exp::to_bool()
+{
+  Data d = this->evaluate();
+  if (d.tag == Data::BOOL)
+  {
+    return d.b;
+  }
+  std::cout << "Implicit conversion of boolean to false";
+  return false;
+}
+
 void MultiStmt::execute()
 {
   for (int i = 0; i < this->stmts.size(); i++)
@@ -36,6 +47,22 @@ int Fn::fn_call(void)
     x->execute();
   }
   return 0;
+}
+
+void IfStmt::execute(void)
+{
+  if (this->cond->to_bool())
+  {
+    this->t_branch->execute();
+  }
+  else if (this->f_branch != nullptr)
+  {
+    this->f_branch->execute();
+  }
+}
+void IfStmt::print(void)
+{
+  cout << "TODO IF STMT PRINT" << endl;
 }
 
 void Pass::execute()

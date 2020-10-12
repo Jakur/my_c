@@ -13,6 +13,7 @@ class Exp
 public:
   virtual Data evaluate(void) = 0;
   virtual void print(void) = 0;
+  bool to_bool(void);
 };
 
 struct Stmt
@@ -34,6 +35,16 @@ struct Fn
   MultiStmt *stmts;
   Fn(MultiStmt *s) : stmts(s) {}
   int fn_call(void);
+};
+
+struct IfStmt : Stmt
+{
+  Exp *cond;
+  MultiStmt *t_branch;
+  MultiStmt *f_branch;
+  IfStmt(Exp *cond, MultiStmt *t, MultiStmt *f) : cond{cond}, t_branch{t}, f_branch{f} {}
+  void execute(void);
+  void print(void);
 };
 
 struct Pass : Stmt

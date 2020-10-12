@@ -44,6 +44,9 @@ print   { return PRINT; }
 {DIGIT}+ {
         yylval.integer = atoi(yytext); return INTEGER;
 }
+"true" {yylval.boolean = true; return BOOL;}
+"false" {yylval.boolean = false; return BOOL;}
+['][0-9a-zA-Z]['] {yylval.character = yytext[0]; return CHAR;}
 
 
 [ \t\f\r]	;		 // ignore white space 
@@ -63,7 +66,12 @@ print   { return PRINT; }
 ";"    {return SEMICOLON;}
 
 "&&" {return AND;}
+"||" {return OR;}
 "int" {return T_INT;}
+"float" {return T_FLOAT;}
+"bool" {return T_BOOL;}
+"char" {return T_CHAR;}
+"string" {return T_STRING;}
 
 "pass" {return PASS;} // PASS RETURN IF THEN ELSE END WHILE DO
 "return" {return RETURN;}
