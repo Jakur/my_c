@@ -113,7 +113,7 @@ Data VarExp::evaluate()
 
 //I'm not sure if I was suposed to do all of these or if there is anything else to add
 //would this work for arrays
-data ArrayExp::evaluate()
+Data ArrayExp::evaluate()
 {
   auto a = state.at(this->id);
   return Data(a);
