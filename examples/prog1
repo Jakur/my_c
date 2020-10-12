@@ -1,6 +1,7 @@
 int main()
 	int x = 6, y = 7, z = -1;
 	bool b = x > y;
+	string s = "Hello" + "World";
 	if b then print x - y; else print y - x; end
-	if (x / y) == 1 then print x - y; else print y - x; end
+	if (x / y) == 1 then print s; else print s; end
 end

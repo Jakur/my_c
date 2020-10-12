@@ -30,17 +30,20 @@ public:
         CHAR,
         BOOL,
         FLOAT,
+        STRING,
     } tag;
     union {
         int i;
         char c;
         float f;
         bool b;
+        std::string *s;
     };
     Data(int i);
     Data(char c);
     Data(float f);
     Data(bool b);
+    Data(std::string *s);
     Data();
     Data to_bool(bool b);
     Data apply(Data *other, BinaryOperator op);
@@ -50,5 +53,6 @@ public:
 Data bool_op(bool left, BinaryOperator op, bool right);
 Data num_op(int left, BinaryOperator op, int right);
 Data num_op(float left, BinaryOperator op, float right);
+Data str_op(std::string *left, BinaryOperator op, std::string *right);
 
 // std::ostream &operator<<(std::ostream &os, Data const &m);

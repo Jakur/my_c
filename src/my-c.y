@@ -35,7 +35,8 @@ BinaryOperator get_op(int x);
   int integer;
   bool boolean;
   char character;
-  char * var_name;
+  char *chars;
+  std::string *str;
   Exp *exp_node_ptr;
   Stmt *stmt_ptr;
   MultiStmt *multi_stmt;
@@ -48,12 +49,12 @@ BinaryOperator get_op(int x);
 %token <number> FLOAT
 %token <boolean> BOOL
 %token <character> CHAR
-%token <var_name> ID
+%token <str> STRING
+%token <chars> ID
 %token PLUS MINUS TIMES DIVIDE AND OR 
 %token SEMICOLON EQUALS PRINT LPAREN RPAREN LBRACE RBRACE LSQUARE RSQUARE
 %token LESSTHAN LESSTHANE GREATTHAN GREATTHANE NOTEQUAL EQUALTO;
-%token PASS RETURN IF THEN ELSE END WHILE DO COMMA
-%token STRING EXCLAM
+%token PASS RETURN IF THEN ELSE END WHILE DO COMMA EXCLAM
 %token T_INT T_FLOAT T_BOOL T_CHAR T_STRING
 // New
 %type <integer> bool_op weak_op strong_op
@@ -183,6 +184,10 @@ num_term:
     bool b = $01;
     $$ = new LiteralExp(Data(b));
   }
+  | STRING {
+    std::string *s = $01;
+    $$ = new LiteralExp(Data(s));
+  }
 ;
 
 // Var Dec 
@@ -226,67 +231,6 @@ return_stmt:
   RETURN ID SEMICOLON {}
 ;
 
-
-// Old
-// program: stmtlist { root = $$; }
-// ;
-
-
-
-// stmtlist: stmtlist SEMICOLON stmt
-//             { // copy up the list and add the stmt to it
-//               $$ = new sequence_node($1,$3);
-//             }
-//          | stmtlist SEMICOLON error
-// 	   { // just copy up the stmtlist when an error occurs
-//              $$ = $1;
-//              yyclearin; } 
-//          |  stmt 
-// 	 { $$ = $1;   }
-// ;
-
-// stmt: ID EQUALS exp { 
-//   $$ = new assign_node($1, $3);
-// 	   }
-       
-// | PRINT exp {
-//   $$ = new print_node($2);
-//  }
-
-// |
-// { $$ = new skip_node();
-// }
-// | LBRACE stmtlist RBRACE { $$=$2; } 
-//  ;
-
-
-// exp:	exp PLUS mulexp { $$ = new BinaryExp($1, BinaryOperator::ADD, $3); }
-
-//       |	exp MINUS mulexp { $$ = new BinaryExp($1, BinaryOperator::SUB, $3); }
-
-//       |	mulexp {  $$ = $1; }
-// ;
-
-
-
-// mulexp:	mulexp TIMES primexp {
-// 	  $$ = new BinaryExp($1, BinaryOperator::MUL, $3); }
-
-//       | mulexp DIVIDE primexp {
-// 	  $$ = new BinaryExp($1, BinaryOperator::DIV, $3); }
-
-//       | primexp { $$=$1;  }
-// ;
-
-
-// // Fix negation
-// primexp:	LPAREN exp RPAREN  {  $$ = $2; }
-
-//       |	NUMBER { $$ = new LiteralExp(Data($1)); }
-
-//       | ID { $$ = new VarExp($1); }
-// ;
- 
 %%
 int main(int argc, char **argv)
 { 

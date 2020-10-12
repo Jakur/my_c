@@ -46,7 +46,17 @@ print   { return PRINT; }
 }
 "true" {yylval.boolean = true; return BOOL;}
 "false" {yylval.boolean = false; return BOOL;}
-['][0-9a-zA-Z]['] {yylval.character = yytext[0]; return CHAR;}
+\'[0-9a-zA-Z]\' {yylval.character = yytext[0]; return CHAR;}
+\"[0-9a-zA-Z]*\" {
+        auto s = new std::string(); 
+        char* str = yytext;
+        for(char* it = ++str; *it; ++it) {
+                s->push_back(*it);
+        }
+        s->pop_back(); // Remove trailing quote
+        yylval.str = s; 
+        return STRING;
+}
 
 
 [ \t\f\r]	;		 // ignore white space 
@@ -93,7 +103,7 @@ print   { return PRINT; }
 "end" {return END;}
 
 {LETTER}[0-9a-zA-Z]* {
-        yylval.var_name = strdup(yytext); return ID;
+        yylval.chars = strdup(yytext); return ID;
 	}
 
 . { BEGIN(ERROR); yymore(); }

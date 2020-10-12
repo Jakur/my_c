@@ -5,6 +5,7 @@
 Data::Data(bool b) : tag{Data::BOOL}, b{b} {}
 Data::Data(int i) : tag{Data::INT}, i{i} {}
 Data::Data(float f) : tag{Data::FLOAT}, f{f} {}
+Data::Data(std::string *s) : tag{Data::STRING}, s{s} {}
 Data::Data() : Data(0) {}
 Data Data::to_bool(bool b)
 {
@@ -28,6 +29,8 @@ Data Data::apply(Data *other, BinaryOperator op)
         {
             return bool_op(this->b, op, other->b);
         }
+        case Data::STRING:
+            return str_op(this->s, op, other->s);
         }
     }
 
@@ -49,6 +52,12 @@ void Data::print()
     case Data::FLOAT:
         std::cout << this->f;
         break;
+    case Data::CHAR:
+        std::cout << this->c;
+        break;
+    case Data::STRING:
+        std::cout << *(this->s);
+        break;
     }
 }
 
@@ -60,6 +69,10 @@ Data bool_op(bool left, BinaryOperator op, bool right)
         return Data(left && right);
     case BinaryOperator::BOR:
         return Data(left || right);
+    case BinaryOperator::EQ:
+        return Data(left == right);
+    case BinaryOperator::NEQ:
+        return Data(left != right);
     }
     return false;
 }
@@ -116,6 +129,23 @@ Data num_op(float left, BinaryOperator op, float right)
         return Data(left == right);
     case BinaryOperator::NEQ:
         return Data(left != right);
+    }
+    return Data(left);
+}
+
+Data str_op(std::string *left, BinaryOperator op, std::string *right)
+{
+    switch (op)
+    {
+    case BinaryOperator::ADD:
+    {
+        auto s = new std::string(*left + *right);
+        return Data(s);
+    }
+    case BinaryOperator::EQ:
+        return Data(*left == *right);
+    case BinaryOperator::NEQ:
+        return Data(*left != *right);
     }
     return Data(left);
 }

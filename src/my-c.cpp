@@ -87,7 +87,7 @@ void AssignStmt::print()
 
 void AssignStmt::execute()
 {
-  Data result = exp->evaluate(); // Todo fix unsafety
+  Data result = exp->evaluate();
 
   state[id] = result;
 }
@@ -103,8 +103,9 @@ void PrintStmt::print()
 
 void PrintStmt::execute()
 {
-  cout << "PRINTING: " << exp->evaluate().i << endl // Todo fix unsafety
-       << endl;
+  cout << "PRINTING: ";
+  exp->evaluate().print();
+  cout << endl;
 }
 
 Data VarExp::evaluate()
