@@ -111,4 +111,23 @@ Data VarExp::evaluate()
   return Data(d);
 }
 
+//I'm not sure if I was suposed to do all of these or if there is anything else to add
+//would this work for arrays
+data ArrayExp::evaluate()
+{
+  auto a = state.at(this->id);
+  return Data(a);
+}
+
+//Is this for loop correct or should I be printing it differently?
+void ArrayExp::print()
+{
+  cout << "Array " << id << " values: ";
+  for (int i = 0; i < this->VarExp.size() -1; i++)
+  {
+    cout << this->VarExp[i] << ", ";
+  }
+  cout << endl;
+}
+
 map<string, Data> state;
