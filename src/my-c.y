@@ -184,6 +184,10 @@ num_term:
     bool b = $01;
     $$ = new LiteralExp(Data(b));
   }
+  | CHAR {
+    char c = $01;
+    $$ = new LiteralExp(Data(c));
+  }
   | STRING {
     std::string *s = $01;
     $$ = new LiteralExp(Data(s));

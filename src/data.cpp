@@ -5,6 +5,7 @@
 Data::Data(bool b) : tag{Data::BOOL}, b{b} {}
 Data::Data(int i) : tag{Data::INT}, i{i} {}
 Data::Data(float f) : tag{Data::FLOAT}, f{f} {}
+Data::Data(char c) : tag{Data::CHAR}, c{c} {}
 Data::Data(std::string *s) : tag{Data::STRING}, s{s} {}
 Data::Data() : Data(0) {}
 Data Data::to_bool(bool b)
@@ -51,6 +52,9 @@ void Data::print()
         break;
     case Data::FLOAT:
         std::cout << this->f;
+        break;
+    case Data::BOOL:
+        std::cout << this->b;
         break;
     case Data::CHAR:
         std::cout << this->c;

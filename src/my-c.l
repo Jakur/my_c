@@ -46,7 +46,12 @@ print   { return PRINT; }
 }
 "true" {yylval.boolean = true; return BOOL;}
 "false" {yylval.boolean = false; return BOOL;}
-\'[0-9a-zA-Z]\' {yylval.character = yytext[0]; return CHAR;}
+\'[0-9a-zA-Z]\' {
+        char* str = yytext;
+        char next = *(++str);
+        yylval.character = next; 
+        return CHAR;
+}
 \"[0-9a-zA-Z]*\" {
         auto s = new std::string(); 
         char* str = yytext;

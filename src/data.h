@@ -40,9 +40,9 @@ public:
         std::string *s;
     };
     Data(int i);
-    Data(char c);
     Data(float f);
     Data(bool b);
+    Data(char c);
     Data(std::string *s);
     Data();
     Data to_bool(bool b);
