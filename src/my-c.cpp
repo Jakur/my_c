@@ -123,9 +123,9 @@ Data ArrayExp::evaluate()
 void ArrayExp::printArray()
 {
   cout << "Array " << id << " values: ";
-  for (int i = 0; i < this->VarExp.size() -1; i++)
+  for (int i = 0; i < this->Exp.size() -1; i++)
   {
-    cout << this->VarExp[i] << ", ";
+    cout << this->Exp[i] << ", ";
   }
   cout << endl;
 }
@@ -134,14 +134,14 @@ void ArrayExp::printArray()
 void ArrayExp::printIndex()
 {
   cout << "Array " << id << " value: ";
-  cout << this->VarExp[this->id] << endl;
+  cout << this->Exp[this->id] << endl;
 }
 
 //Would this add a value at the index?
 void ArrayExp::execute()
 {
   Data result = exp->evaluate();
-  VarExp[id] = result;
+  Exp[id] = result;
 }
 
 map<string, Data> state;
