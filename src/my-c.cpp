@@ -120,7 +120,7 @@ Data ArrayExp::evaluate()
 }
 
 //Is this for loop correct or should I be printing it differently?
-void ArrayExp::print()
+void ArrayExp::printArray()
 {
   cout << "Array " << id << " values: ";
   for (int i = 0; i < this->VarExp.size() -1; i++)
@@ -128,6 +128,20 @@ void ArrayExp::print()
     cout << this->VarExp[i] << ", ";
   }
   cout << endl;
+}
+
+//Printing specific index, need feedback if this is correct
+void ArrayExp::printIndex()
+{
+  cout << "Array " << id << " value: ";
+  cout << this->VarExp[this->id] << endl;
+}
+
+//Would this add a value at the index?
+void ArrayExp::execute()
+{
+  Data result = exp->evaluate();
+  VarExp[id] = result;
 }
 
 map<string, Data> state;
