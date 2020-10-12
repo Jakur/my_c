@@ -123,7 +123,7 @@ public:
 };
 
 //Array Class declaration
-class ArrayExp : Exp
+class ArrayExp : public Exp
 {
 public:
   virtual Data evaluate(void) = 0;
