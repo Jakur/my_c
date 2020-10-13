@@ -23,14 +23,14 @@ bool Exp::to_bool(VarStorage *state)
 
 void MultiStmt::execute(VarStorage *state)
 {
-  for (int i = 0; i < this->stmts.size(); i++)
+  for (int i = this->stmts.size() - 1; i >= 0; i--)
   {
     this->stmts[i]->execute(state);
   }
 }
 void MultiStmt::print(VarStorage *state)
 {
-  for (int i = 0; i < this->stmts.size(); i++)
+  for (int i = this->stmts.size() - 1; i >= 0; i--)
   {
     this->stmts[i]->print(state);
   }
@@ -48,8 +48,13 @@ Data Fn::fn_call(VarStorage storage)
       return -1;
     }
     x->execute(&storage);
+    auto ret = x->ret_val();
+    if (ret.has_value())
+    {
+      return ret.value();
+    }
   }
-  return stmts->stmts[0]->ret_val();
+  return Data(0);
 }
 
 void IfStmt::execute(VarStorage *state)
@@ -115,14 +120,37 @@ void ReturnStmt::execute(VarStorage *state)
 
 void ReturnStmt::print(VarStorage *state)
 {
-  cout << "Return";
+  cout << "Return ";
   exp->print(state);
+  this->ret_val();
   cout << endl;
 }
 
-Data ReturnStmt::ret_val()
+std::optional<Data> ReturnStmt::ret_val(void)
 {
-  return this->d;
+  return std::optional<Data>(this->d);
+}
+
+Data FnCallExp::evaluate(VarStorage *state)
+{
+  Fn *f = fns[this->name];
+  auto next_map = std::map<std::string, Data>();
+  if (this->exps != nullptr)
+  {
+    this->exps->execute(state);
+    int start = f->parameters.size() - 1;
+    for (int i = start; i >= 0; i--)
+    {
+      // One is reversed relative to the other
+      next_map[f->parameters[i]] = this->exps->evaluated[start - i];
+    }
+  }
+  Data d = f->fn_call(VarStorage(next_map));
+  return d;
+}
+void FnCallExp::print(VarStorage *state)
+{
+  cout << "TODO FnCallExp print" << endl;
 }
 
 Data NegationExp::evaluate(VarStorage *state)
@@ -146,9 +174,35 @@ void NegationExp::print(VarStorage *state)
   this->exp->print(state);
 }
 
+void ExpList::print(VarStorage *state)
+{
+  for (int i = this->exps.size() - 1; i >= 0; i--)
+  {
+    this->exps[i]->print(state);
+    std::cout << ", ";
+  }
+  std::cout << endl;
+}
+void ExpList::execute(VarStorage *state)
+{
+  for (int i = this->exps.size() - 1; i >= 0; i--)
+  {
+    Data d = this->exps[i]->evaluate(state);
+    this->evaluated.push_back(d);
+  }
+}
+
+void ParmList::print(VarStorage *state)
+{
+  std::cout << "TODO Parameter List Print" << std::endl;
+}
+void ParmList::execute(VarStorage *state)
+{
+}
+
 Data VarExp::evaluate(VarStorage *state)
 {
   return state->get(&this->id);
 }
 
-// map<string, Data> state;
+map<string, Fn *> fns;

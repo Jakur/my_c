@@ -39,7 +39,9 @@ BinaryOperator get_op(int x);
   std::string *str;
   Exp *exp_node_ptr;
   Stmt *stmt_ptr;
+  ExpList *exp_list;
   MultiStmt *multi_stmt;
+  ParmList *parms;
   Fn *fn;
 }
 
@@ -56,16 +58,23 @@ BinaryOperator get_op(int x);
 %token LESSTHAN LESSTHANE GREATTHAN GREATTHANE NOTEQUAL EQUALTO;
 %token PASS RETURN IF THEN ELSE END WHILE DO COMMA EXCLAM
 %token T_INT T_FLOAT T_BOOL T_CHAR T_STRING
+%token PCT
 // New
 %type <integer> bool_op weak_op strong_op type prim
 %type <stmt_ptr> stmt var_dec asgn_stmt if_stmt while_stmt return_stmt print_stmt declaration
 %type <multi_stmt> stmts declaration_list
+%type <exp_list> exp_list
 %type <exp_node_ptr> exp weak_exp strong_exp not_exp num_term func_invo array_index
 %type <fn> func_decl
+%type <parms> parameter_list
 %%
 // New
 program:
-    func_decl {Fn *fn = $01; if (fn->ident == "main") {main_fn = fn;}}
+    func_decl {auto f = $01; fns[f->ident] = f; cout << "b";}
+    | func_decl program {
+      cout << "a";
+      auto f = $01; fns[f->ident] = f;
+    }
 ;
 stmts:
     stmt {$$ = new MultiStmt($01);}
@@ -214,23 +223,33 @@ declaration:
 
 // Functions
 func_decl:
-  type ID LPAREN RPAREN stmts END {$$ = new Fn($02, $05);}
-  | type ID LPAREN parameter_list RPAREN stmts END {} {$$ = new Fn($02, $06);}
+  type ID LPAREN RPAREN stmts END {$$ = new Fn($02, std::vector<std::string>(), $05);}
+  | type ID LPAREN parameter_list RPAREN stmts END {} {auto p = $04; $$ = new Fn($02, p->names, $06);}
 ;
 parameter_list:
-  type ID {} 
-  | type ID COMMA parameter_list {}
+  type ID {$$ = new ParmList($02);} 
+  | type ID COMMA parameter_list {
+    ParmList *s = $04;
+    auto next = $02;
+    s->names.push_back(next);
+    $$ = s;
+  }
 ;
 func_invo:
-  ID LPAREN RPAREN {}
-  | ID LPAREN exp_list RPAREN {}
+  ID LPAREN RPAREN {$$ = new FnCallExp($01, nullptr);}
+  | ID LPAREN exp_list RPAREN {$$ = new FnCallExp($01, $03);}
 ;
 exp_list:
-  exp {}
-  | exp_list COMMA exp {}
+  exp {$$ = new ExpList($01);}
+  | exp COMMA exp_list {
+    ExpList *s = $03;
+    auto next = $01;
+    s->exps.push_back(next);
+    $$ = s;
+  }
 ;
 return_stmt:
-  RETURN ID SEMICOLON {}
+  RETURN exp SEMICOLON {$$ = new ReturnStmt($02);}
 ;
 
 %%
@@ -243,7 +262,8 @@ int main(int argc, char **argv)
 
   cout << "---------- list of input program------------" << endl << endl;
   // root -> print();
-
+  cout << "Size: " << fns.size() << endl;
+  main_fn = fns["main"];
   cout << "---------- execution of input program------------" << endl << endl;
   if (main_fn == nullptr) {
     cout << "NULL MAIN" << endl;

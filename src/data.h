@@ -41,7 +41,6 @@ public:
     Data(char c);
     Data(std::string *s);
     Data();
-    Data to_bool(bool b);
     Data apply(Data *other, BinaryOperator op);
     void print();
 };
