@@ -1,4 +1,4 @@
-int main()
+string main()
   //fizzbuzz without %
   string fizzbuzz ="";
   string fizz = "fizz";
