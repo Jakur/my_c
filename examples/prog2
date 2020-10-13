@@ -1,30 +1,68 @@
 int main()
-  //value v
-  int v = 4;
+  //fizzbuzz without %
+  string fizzbuzz ="";
+  string fizz = "fizz";
+  string buzz = "buzz";
+  int rem = 0;
   
-  //array length n
-  int n = 5;
-  
-  //I belive this is how we declare arrays with our grammar
-  int [] a = {1, 2, 3, 4, 5};
-  
-  //func call, I think the grammar is correct here
-  int answer = search(v, n, [] a)
-  //i think this might be unecessary
-  if answer != -1
-    then return answer
-    else return -1
+  int i = 1;
+  while i <=100
+  do
+    //Gets modulo answer
+    rem = remainder(i);
+    
+    //concatenates strings together
+    if (rem == 15)
+      then fizzbuzz = fizzbuzz + fizz + buzz + " ";
+    end
+    
+    if (rem == 3)
+      then fizzbuzz = fizzbuzz + fizz + " ";
+    end
+    
+    if (rem == 5)
+      then fizzbuzz = fizzbuzz + buzz + " ";
+    end
+    
+    //should add the integer to the string
+    if (rem == -1)
+      then fizzbuzz = fizzbuzz + i + " ";
+    end
+    
   end
+  
+  print fizzbuzz;
+  
 end
 
-int search(int v, int n, int [] a)
-  int i = 0;
-  while i != n
+//Determines if the current value is divisible by 3, 5, or 15
+int remainder(int a)
+  //for storing the remainders tested
+  int threeRemainder = a;
+  int fiveRemainder = a;
+  
+  while threeRemainder >= 3
   do
-    if a [i] == v
-      then return i;
-      else i = i + 1;
-    end
+    threeRemainder = threeRemainder - 3;
   end
+  
+  while fiveRemainder >= 5
+  do
+    fiveRemainder = fiveRemainder - 5;
+  end
+  
+  if (threeRemainder == 0 && fiveRemainder == 0)
+    then return 15;
+  end
+  
+  if (threeRemainder == 0)
+    then return 3;
+  end
+  
+  if (fiveRemainder == 0)
+    then return 5;
+  end
+  
   return -1;
+  
 end
