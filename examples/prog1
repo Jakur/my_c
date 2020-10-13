@@ -4,7 +4,7 @@ int main()
 	float b = 1.01;
 	char c = c;
 	bool d = true;
-	string e = helloworld;
+	string e = "helloworld";
 	int [] f = {1};
 	
 	//printing variables
@@ -19,7 +19,7 @@ int main()
 	print a + a;
 	print a - a;
 	print a * a;
-	print a / a
+	print a / a;
 	
 	//testing all booleans and if else statements
 	if 1 && 0
