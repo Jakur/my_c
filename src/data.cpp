@@ -54,7 +54,14 @@ void Data::print()
         std::cout << this->f;
         break;
     case Data::BOOL:
-        std::cout << this->b;
+        if (this->b)
+        {
+            std::cout << "true";
+        }
+        else
+        {
+            std::cout << "false";
+        }
         break;
     case Data::CHAR:
         std::cout << this->c;

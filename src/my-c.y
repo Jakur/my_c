@@ -57,7 +57,7 @@ BinaryOperator get_op(int x);
 %token PASS RETURN IF THEN ELSE END WHILE DO COMMA EXCLAM
 %token T_INT T_FLOAT T_BOOL T_CHAR T_STRING
 // New
-%type <integer> bool_op weak_op strong_op
+%type <integer> bool_op weak_op strong_op type prim
 %type <stmt_ptr> stmt var_dec asgn_stmt if_stmt while_stmt return_stmt print_stmt declaration
 %type <multi_stmt> stmts declaration_list
 %type <exp_node_ptr> exp weak_exp strong_exp not_exp num_term func_invo array_index
@@ -65,7 +65,7 @@ BinaryOperator get_op(int x);
 %%
 // New
 program:
-    func_decl {if (main_fn == nullptr) {main_fn = $1;}}
+    func_decl {Fn *fn = $01; if (fn->ident == "main") {main_fn = fn;}}
 ;
 stmts:
     stmt {$$ = new MultiStmt($01);}
@@ -96,15 +96,15 @@ asgn_stmt:
 ;
 // Types 
 prim: 
-  T_INT
-  | T_FLOAT
-  | T_BOOL
-  | T_CHAR
-  | T_STRING
+  T_INT {$$ = T_INT;}
+  | T_FLOAT {$$ = T_FLOAT;}
+  | T_BOOL {$$ = T_BOOL;}
+  | T_CHAR {$$ = T_CHAR;}
+  | T_STRING {$$ = T_STRING;}
 ;
 type: 
-  prim {}
-  | array_type {}
+  prim 
+  | array_type {$$ = T_INT;} // TODO
 ;
 
 dims: 
@@ -153,7 +153,7 @@ weak_op:
 ;
 
 strong_exp:
-  not_exp 
+  not_exp
   | strong_exp strong_op not_exp {$$ = new BinaryExp($01, get_op($02), $03);}
 ;
 
@@ -163,7 +163,7 @@ strong_op:
 ;
 
 not_exp:
-  EXCLAM num_term {new LiteralExp(Data(0));}
+  EXCLAM num_term {$$ = new NegationExp($02);}
   | num_term
 ;
 
@@ -216,8 +216,8 @@ declaration:
 
 // Functions
 func_decl:
-  type ID LPAREN RPAREN stmts END {$$ = new Fn($05);}
-  | type ID LPAREN parameter_list RPAREN stmts END {} {$$ = new Fn($06);}
+  type ID LPAREN RPAREN stmts END {$$ = new Fn($02, $05);}
+  | type ID LPAREN parameter_list RPAREN stmts END {} {$$ = new Fn($02, $06);}
 ;
 parameter_list:
   type ID {} 

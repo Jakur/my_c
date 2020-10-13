@@ -14,8 +14,9 @@ bool Exp::to_bool()
   {
     return d.b;
   }
-  int i = d.i;
-  std::cout << "Expected boolean got " << i << endl;
+  std::cout << "Expected boolean got ";
+  d.print();
+  std::cout << endl;
   std::cout << "Implicit conversion of boolean to false";
   return false;
 }
@@ -35,7 +36,7 @@ void MultiStmt::print()
   }
 }
 
-int Fn::fn_call(void)
+Data Fn::fn_call(void)
 {
   cout << "Calling Fn" << endl;
   for (int i = stmts->stmts.size() - 1; i >= 0; i--)
@@ -48,7 +49,7 @@ int Fn::fn_call(void)
     }
     x->execute();
   }
-  return 0;
+  return stmts->stmts[0]->ret_val();
 }
 
 void IfStmt::execute(void)
@@ -106,6 +107,50 @@ void PrintStmt::execute()
   cout << "PRINTING: ";
   exp->evaluate().print();
   cout << endl;
+}
+
+void ReturnStmt::execute()
+{
+  this->d = exp->evaluate();
+}
+
+void ReturnStmt::print()
+{
+  cout << "Return";
+  exp->print();
+  cout << endl;
+}
+
+Data ReturnStmt::ret_val()
+{
+  return this->d;
+}
+
+Data NegationExp::evaluate()
+{
+  if (this->value.tag == Data::BOOL)
+  {
+    bool b = this->value.b;
+    if (b)
+    {
+      return Data(false);
+    }
+    else
+    {
+      return Data(true);
+    }
+  }
+  std::cout << "Expected boolean got ";
+  this->value.print();
+  std::cout << endl;
+  std::cout << "Implicit conversion of boolean to false";
+
+  return Data(true);
+}
+void NegationExp::print()
+{
+  cout << "!";
+  this->value.print();
 }
 
 Data VarExp::evaluate()

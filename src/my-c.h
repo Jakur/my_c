@@ -20,6 +20,10 @@ struct Stmt
 {
   virtual void execute(void) = 0;
   virtual void print(void) = 0;
+  Data ret_val(void)
+  {
+    return Data(0);
+  }
 };
 
 struct MultiStmt : Stmt
@@ -32,9 +36,10 @@ struct MultiStmt : Stmt
 
 struct Fn
 {
+  std::string ident;
   MultiStmt *stmts;
-  Fn(MultiStmt *s) : stmts(s) {}
-  int fn_call(void);
+  Fn(std::string ident, MultiStmt *s) : stmts(s), ident{ident} {}
+  Data fn_call(void);
 };
 
 struct IfStmt : Stmt
@@ -76,6 +81,17 @@ public:
   void execute();
 };
 
+class ReturnStmt : public Stmt
+{
+public:
+  Exp *exp;
+  Data d;
+  ReturnStmt(Exp *exp) : exp{exp}, d(Data(0)) {}
+  void print();
+  void execute();
+  Data ret_val();
+};
+
 class BinaryExp : public Exp
 {
 public:
@@ -111,6 +127,15 @@ public:
   {
     value.print();
   };
+};
+
+class NegationExp : public Exp
+{
+public:
+  Data value;
+  NegationExp(Data value) : value{value} {}
+  Data evaluate(void);
+  void print(void);
 };
 
 class VarExp : public Exp
