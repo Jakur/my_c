@@ -19,20 +19,14 @@ public:
 
 struct Stmt
 {
-  virtual void execute(VarStorage *state) = 0;
+  virtual std::optional<Data> execute(VarStorage *state) = 0;
   virtual void print(VarStorage *state) = 0;
-  virtual std::optional<Data> ret_val() = 0;
-  // std::optional<Data> ret_val(void)
-  // {
-  //   cout << "Basic bitches" << endl;
-  //   return std::optional<Data>();
-  // }
 };
 
 struct MultiStmt : Stmt
 {
   std::vector<Stmt *> stmts;
-  void execute(VarStorage *state);
+  std::optional<Data> execute(VarStorage *state);
   void print(VarStorage *state);
   std::optional<Data> ret_val() { return std::optional<Data>(); }
   MultiStmt(Stmt *s) : stmts(std::vector<Stmt *>{s}) {}
@@ -53,7 +47,7 @@ struct IfStmt : Stmt
   MultiStmt *t_branch;
   MultiStmt *f_branch;
   IfStmt(Exp *cond, MultiStmt *t, MultiStmt *f) : cond{cond}, t_branch{t}, f_branch{f} {}
-  void execute(VarStorage *state);
+  std::optional<Data> execute(VarStorage *state);
   void print(VarStorage *state);
   std::optional<Data> ret_val() { return std::optional<Data>(); }
 };
@@ -63,14 +57,14 @@ struct WhileStmt : Stmt
   Exp *cond;
   MultiStmt *body;
   WhileStmt(Exp *cond, MultiStmt *body) : cond{cond}, body{body} {}
-  void execute(VarStorage *state);
+  std::optional<Data> execute(VarStorage *state);
   void print(VarStorage *state);
   std::optional<Data> ret_val() { return std::optional<Data>(); }
 };
 
 struct Pass : Stmt
 {
-  void execute(VarStorage *state);
+  std::optional<Data> execute(VarStorage *state);
   void print(VarStorage *state);
   std::optional<Data> ret_val() { return std::optional<Data>(); }
 };
@@ -84,7 +78,7 @@ protected:
 public:
   AssignStmt(string name, Exp *expression);
   void print(VarStorage *state);
-  void execute(VarStorage *state);
+  std::optional<Data> execute(VarStorage *state);
   std::optional<Data> ret_val() { return std::optional<Data>(); }
 };
 
@@ -96,7 +90,7 @@ protected:
 public:
   PrintStmt(Exp *myexp);
   void print(VarStorage *state);
-  void execute(VarStorage *state);
+  std::optional<Data> execute(VarStorage *state);
   std::optional<Data> ret_val() { return std::optional<Data>(); }
 };
 
@@ -107,7 +101,7 @@ public:
   Data d;
   ReturnStmt(Exp *exp) : exp{exp}, d(Data(0)) {}
   void print(VarStorage *state);
-  void execute(VarStorage *state);
+  std::optional<Data> execute(VarStorage *state);
   std::optional<Data> ret_val();
 };
 
@@ -163,9 +157,8 @@ public:
   std::vector<Exp *> exps;
   std::vector<Data> evaluated;
   void print(VarStorage *state);
-  void execute(VarStorage *state);
+  std::optional<Data> execute(VarStorage *state);
   ExpList(Exp *exp) : exps(std::vector<Exp *>{exp}), evaluated(std::vector<Data>()) {}
-  std::optional<Data> ret_val() { return std::optional<Data>(); }
 };
 
 class FnCallExp : public Exp
@@ -183,9 +176,8 @@ class ParmList : public Stmt
 public:
   std::vector<std::string> names;
   void print(VarStorage *state);
-  void execute(VarStorage *state);
+  std::optional<Data> execute(VarStorage *state);
   ParmList(std::string s) : names(std::vector<std::string>{s}) {}
-  std::optional<Data> ret_val() { return std::optional<Data>(); }
 };
 
 class IndexExp : public Exp

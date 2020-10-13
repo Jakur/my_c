@@ -1,0 +1,25 @@
+int main()
+  int v = 4;
+  
+  int n = 5;
+  
+  int [n] a = {1, 2, 3, 4, 5};
+  int answer = search(v, n, a);
+  if answer != -1
+    then print "Found Index "; print answer;
+    else print "Number not found in array";
+  end
+end
+
+int search(int v, int n, int [5] a)
+  int i = 0;
+  while i != n
+  do
+    if a [i] == v
+      then return i;
+      else i = i + 1;
+    end
+  end
+  return -1;
+end
+

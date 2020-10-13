@@ -263,15 +263,15 @@ int main(int argc, char **argv)
 
   //  yydebug = 1;
   yyparse();
-  cout << "Testing something..." << endl;
-  auto x = new Array(2 * 3 * 4, std::vector<int>{2, 3, 4});
-  cout << "Data size " << x->data.size() << endl;
-  for (int i = 0; i < x->sizes.size(); i++) {
-    cout << x->sizes[i] << endl;
-  }
-  cout << "Got here" << endl;
-  x->get(std::vector<int>{0, 0, 0});
-  cout << "End Test" << endl;
+  // cout << "Testing something..." << endl;
+  // auto x = new Array(2 * 3 * 4, std::vector<int>{2, 3, 4});
+  // cout << "Data size " << x->data.size() << endl;
+  // for (int i = 0; i < x->sizes.size(); i++) {
+  //   cout << x->sizes[i] << endl;
+  // }
+  // cout << "Got here" << endl;
+  // x->get(std::vector<int>{0, 0, 0});
+  // cout << "End Test" << endl;
 
   cout << "---------- list of input program------------" << endl << endl;
   // root -> print();

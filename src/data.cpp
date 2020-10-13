@@ -166,17 +166,12 @@ Data str_op(std::string *left, BinaryOperator op, std::string *right)
 int Array::one_d(std::vector<int> indices)
 {
     int mul = 1;
-    std::cout << this->sizes[0];
-    std::cout << this->sizes[1];
     int index = indices[0];
     for (int i = 1; i < indices.size(); i++)
     {
-        std::cout << "Size: " << this->sizes[i - 1] << std::endl;
         mul *= this->sizes[i - 1];
         index += (indices[i] * mul);
-        std::cout << "Index: " << index << std::endl;
     }
-    std::cout << "Final index: " << index << std::endl;
     return index;
 }
 Data Array::get(std::vector<int> indices)
