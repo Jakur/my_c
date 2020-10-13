@@ -72,7 +72,6 @@ stmts:
   | stmt stmts {
     MultiStmt *s = $02;
     auto next = $01;
-    next->print(); 
     s->stmts.push_back(next);
     $$ = s;
   }
@@ -204,7 +203,6 @@ declaration_list:
   | declaration COMMA declaration_list {
     MultiStmt *s = $03;
     auto next = $01;
-    next->print(); 
     s->stmts.push_back(next);
     $$ = s;
   }
@@ -251,7 +249,7 @@ int main(int argc, char **argv)
     cout << "NULL MAIN" << endl;
   } else {
     cout << "main() statement count: " << main_fn->stmts->stmts.size() << endl;
-    main_fn->fn_call();
+    main_fn->fn_call(VarStorage(map<string, Data>()));
   }
 
   cout << "Finished Testing" << endl;

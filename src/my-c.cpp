@@ -7,9 +7,9 @@
 
 using namespace std;
 
-bool Exp::to_bool()
+bool Exp::to_bool(VarStorage *state)
 {
-  Data d = this->evaluate();
+  Data d = this->evaluate(state);
   if (d.tag == Data::BOOL)
   {
     return d.b;
@@ -21,22 +21,22 @@ bool Exp::to_bool()
   return false;
 }
 
-void MultiStmt::execute()
+void MultiStmt::execute(VarStorage *state)
 {
   for (int i = 0; i < this->stmts.size(); i++)
   {
-    this->stmts[i]->execute();
+    this->stmts[i]->execute(state);
   }
 }
-void MultiStmt::print()
+void MultiStmt::print(VarStorage *state)
 {
   for (int i = 0; i < this->stmts.size(); i++)
   {
-    this->stmts[i]->print();
+    this->stmts[i]->print(state);
   }
 }
 
-Data Fn::fn_call(void)
+Data Fn::fn_call(VarStorage storage)
 {
   cout << "Calling Fn" << endl;
   for (int i = stmts->stmts.size() - 1; i >= 0; i--)
@@ -47,31 +47,31 @@ Data Fn::fn_call(void)
       cout << "NULL STMT!";
       return -1;
     }
-    x->execute();
+    x->execute(&storage);
   }
   return stmts->stmts[0]->ret_val();
 }
 
-void IfStmt::execute(void)
+void IfStmt::execute(VarStorage *state)
 {
-  if (this->cond->to_bool())
+  if (this->cond->to_bool(state))
   {
-    this->t_branch->execute();
+    this->t_branch->execute(state);
   }
   else if (this->f_branch != nullptr)
   {
-    this->f_branch->execute();
+    this->f_branch->execute(state);
   }
 }
-void IfStmt::print(void)
+void IfStmt::print(VarStorage *state)
 {
   cout << "TODO IF STMT PRINT" << endl;
 }
 
-void Pass::execute()
+void Pass::execute(VarStorage *state)
 {
 }
-void Pass::print()
+void Pass::print(VarStorage *state)
 {
   cout << "pass" << endl;
 }
@@ -79,45 +79,44 @@ void Pass::print()
 AssignStmt::AssignStmt(std::string name, Exp *expression)
     : id(name), exp(expression) {}
 
-void AssignStmt::print()
+void AssignStmt::print(VarStorage *state)
 {
   cout << id << " = ";
-  exp->print();
+  exp->print(state);
   cout << endl;
 }
 
-void AssignStmt::execute()
+void AssignStmt::execute(VarStorage *state)
 {
-  Data result = exp->evaluate();
-
-  state[id] = result;
+  Data result = exp->evaluate(state);
+  state->assign(id, result);
 }
 
 PrintStmt::PrintStmt(Exp *myexp) : exp(myexp) {}
 
-void PrintStmt::print()
+void PrintStmt::print(VarStorage *state)
 {
   cout << "print ";
-  exp->print();
+  exp->print(state);
   cout << endl;
 }
 
-void PrintStmt::execute()
+void PrintStmt::execute(VarStorage *state)
 {
   cout << "PRINTING: ";
-  exp->evaluate().print();
+  exp->evaluate(state).print();
   cout << endl;
 }
 
-void ReturnStmt::execute()
+void ReturnStmt::execute(VarStorage *state)
 {
-  this->d = exp->evaluate();
+  this->d = exp->evaluate(state);
 }
 
-void ReturnStmt::print()
+void ReturnStmt::print(VarStorage *state)
 {
   cout << "Return";
-  exp->print();
+  exp->print(state);
   cout << endl;
 }
 
@@ -126,37 +125,30 @@ Data ReturnStmt::ret_val()
   return this->d;
 }
 
-Data NegationExp::evaluate()
+Data NegationExp::evaluate(VarStorage *state)
 {
-  if (this->value.tag == Data::BOOL)
+  Data d = this->exp->evaluate(state);
+  if (d.tag == Data::BOOL)
   {
-    bool b = this->value.b;
-    if (b)
-    {
-      return Data(false);
-    }
-    else
-    {
-      return Data(true);
-    }
+    bool b = d.b;
+    return Data(!b);
   }
   std::cout << "Expected boolean got ";
-  this->value.print();
+  d.print();
   std::cout << endl;
   std::cout << "Implicit conversion of boolean to false";
 
   return Data(true);
 }
-void NegationExp::print()
+void NegationExp::print(VarStorage *state)
 {
   cout << "!";
-  this->value.print();
+  this->exp->print(state);
 }
 
-Data VarExp::evaluate()
+Data VarExp::evaluate(VarStorage *state)
 {
-  auto d = state.at(this->id);
-  return Data(d);
+  return state->get(&this->id);
 }
 
-map<string, Data> state;
+// map<string, Data> state;

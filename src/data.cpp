@@ -2,6 +2,20 @@
 #include "stdio.h"
 #include "iostream"
 
+void VarStorage::declare(std::string id, Data init)
+{
+    this->state[id] = init;
+}
+void VarStorage::assign(std::string id, Data val)
+{
+    this->state[id] = val;
+}
+Data VarStorage::get(std::string *name)
+{
+    auto d = this->state.at(*name);
+    return Data(d);
+}
+
 Data::Data(bool b) : tag{Data::BOOL}, b{b} {}
 Data::Data(int i) : tag{Data::INT}, i{i} {}
 Data::Data(float f) : tag{Data::FLOAT}, f{f} {}
@@ -160,15 +174,3 @@ Data str_op(std::string *left, BinaryOperator op, std::string *right)
     }
     return Data(left);
 }
-
-// std::ostream &operator<<(std::ostream &os, Data const &m)
-// {
-//     switch (m.tag)
-//     {
-//     case Data::INT:
-//         return os << 1;
-//     case Data::FLOAT:
-//         return os << 2;
-//     }
-//     return os;
-// }

@@ -17,10 +17,6 @@ enum class BinaryOperator
     NEQ
 };
 
-class VarStorage
-{
-};
-
 class Data
 {
 public:
@@ -54,5 +50,17 @@ Data bool_op(bool left, BinaryOperator op, bool right);
 Data num_op(int left, BinaryOperator op, int right);
 Data num_op(float left, BinaryOperator op, float right);
 Data str_op(std::string *left, BinaryOperator op, std::string *right);
+
+class VarStorage
+{
+protected:
+    std::map<std::string, Data> state;
+
+public:
+    VarStorage(std::map<std::string, Data> map) : state{map} {}
+    void declare(std::string id, Data init);
+    void assign(std::string id, Data val);
+    Data get(std::string *name);
+};
 
 // std::ostream &operator<<(std::ostream &os, Data const &m);
