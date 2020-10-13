@@ -188,6 +188,25 @@ public:
   std::optional<Data> ret_val() { return std::optional<Data>(); }
 };
 
+class IndexExp : public Exp
+{
+public:
+  std::string id;
+  ExpList *indices;
+  IndexExp(std::string id, ExpList *indices) : id{id}, indices{indices} {}
+  Data evaluate(VarStorage *state);
+  void print(VarStorage *state);
+};
+
+class ArrayInitExp : public Exp
+{
+public:
+  ExpList *values;
+  ArrayInitExp(ExpList *values) : values{values} {}
+  Data evaluate(VarStorage *state);
+  void print(VarStorage *state);
+};
+
 class VarExp : public Exp
 {
 public:

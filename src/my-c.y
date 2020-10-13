@@ -57,22 +57,21 @@ BinaryOperator get_op(int x);
 %token SEMICOLON EQUALS PRINT LPAREN RPAREN LBRACE RBRACE LSQUARE RSQUARE
 %token LESSTHAN LESSTHANE GREATTHAN GREATTHANE NOTEQUAL EQUALTO;
 %token PASS RETURN IF THEN ELSE END WHILE DO COMMA EXCLAM
-%token T_INT T_FLOAT T_BOOL T_CHAR T_STRING
+%token T_INT T_FLOAT T_BOOL T_CHAR T_STRING T_ARRAY
 %token PCT
 // New
-%type <integer> bool_op weak_op strong_op type prim
+%type <integer> bool_op weak_op strong_op type prim array_type
 %type <stmt_ptr> stmt var_dec asgn_stmt if_stmt while_stmt return_stmt print_stmt declaration
 %type <multi_stmt> stmts declaration_list
-%type <exp_list> exp_list
+%type <exp_list> exp_list dims
 %type <exp_node_ptr> exp weak_exp strong_exp not_exp num_term func_invo array_index
 %type <fn> func_decl
 %type <parms> parameter_list
 %%
 // New
 program:
-    func_decl {auto f = $01; fns[f->ident] = f; cout << "b";}
+    func_decl {auto f = $01; fns[f->ident] = f;}
     | func_decl program {
-      cout << "a";
       auto f = $01; fns[f->ident] = f;
     }
 ;
@@ -112,18 +111,23 @@ prim:
 ;
 type: 
   prim 
-  | array_type {$$ = T_INT;} // TODO
+  | array_type {$$ = T_ARRAY;}
 ;
 
 dims: 
-    LSQUARE exp RSQUARE
-  | LSQUARE exp RSQUARE dims
+    LSQUARE exp RSQUARE {$$ = new ExpList($02);}
+  | LSQUARE exp RSQUARE dims {
+    ExpList *s = $04;
+    auto next = $02;
+    s->exps.push_back(next);
+    $$ = s;
+  }
 ;
 array_type: 
-  prim dims
+  prim dims {$$ = T_ARRAY;}
 ;
 array_index:
-  ID dims {new LiteralExp(Data(0));}
+  ID dims {$$ = new IndexExp($01, $02);}
 ;
 
 // Control Flow
@@ -205,7 +209,7 @@ num_term:
 // Var Dec 
 var_dec:
   type declaration_list SEMICOLON {$$ = $02;}
-  | type ID EQUALS LBRACE exp_list RBRACE SEMICOLON {$$ = new Pass();}
+  | type ID EQUALS LBRACE exp_list RBRACE SEMICOLON {$$ = new AssignStmt($02, new ArrayInitExp($05));}
 ; 
 declaration_list:
   declaration {$$ = new MultiStmt($01);}
@@ -259,6 +263,15 @@ int main(int argc, char **argv)
 
   //  yydebug = 1;
   yyparse();
+  cout << "Testing something..." << endl;
+  auto x = new Array(2 * 3 * 4, std::vector<int>{2, 3, 4});
+  cout << "Data size " << x->data.size() << endl;
+  for (int i = 0; i < x->sizes.size(); i++) {
+    cout << x->sizes[i] << endl;
+  }
+  cout << "Got here" << endl;
+  x->get(std::vector<int>{0, 0, 0});
+  cout << "End Test" << endl;
 
   cout << "---------- list of input program------------" << endl << endl;
   // root -> print();

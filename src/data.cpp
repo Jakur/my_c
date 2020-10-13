@@ -7,6 +7,7 @@ Data::Data(int i) : tag{Data::INT}, i{i} {}
 Data::Data(float f) : tag{Data::FLOAT}, f{f} {}
 Data::Data(char c) : tag{Data::CHAR}, c{c} {}
 Data::Data(std::string *s) : tag{Data::STRING}, s{s} {}
+Data::Data(Array *a) : tag{Data::ARR}, a{a} {}
 Data::Data() : Data(0) {}
 Data Data::apply(Data *other, BinaryOperator op)
 {
@@ -28,13 +29,13 @@ Data Data::apply(Data *other, BinaryOperator op)
         }
         case Data::STRING:
             return str_op(this->s, op, other->s);
+        case Data::ARR:
+            std::cout << "Cannot perform binary operations on an array" << std::endl;
         }
     }
-
     else
     {
         std::cout << "Cannot implicitly convert " << this->tag << " to " << other->tag << std::endl;
-        // Todo implicit casting?
     }
     return Data(0);
 }
@@ -65,6 +66,12 @@ void Data::print()
     case Data::STRING:
         std::cout << *(this->s);
         break;
+    case Data::ARR:
+    {
+        Array *arr = this->a;
+        arr->print();
+        break;
+    }
     }
 }
 
@@ -155,6 +162,44 @@ Data str_op(std::string *left, BinaryOperator op, std::string *right)
         return Data(*left != *right);
     }
     return Data(left);
+}
+int Array::one_d(std::vector<int> indices)
+{
+    int mul = 1;
+    std::cout << this->sizes[0];
+    std::cout << this->sizes[1];
+    int index = indices[0];
+    for (int i = 1; i < indices.size(); i++)
+    {
+        std::cout << "Size: " << this->sizes[i - 1] << std::endl;
+        mul *= this->sizes[i - 1];
+        index += (indices[i] * mul);
+        std::cout << "Index: " << index << std::endl;
+    }
+    std::cout << "Final index: " << index << std::endl;
+    return index;
+}
+Data Array::get(std::vector<int> indices)
+{
+    return data[this->one_d(indices)];
+}
+Data Array::set(std::vector<int> indices, Data val)
+{
+    data[this->one_d(indices)] = val;
+}
+Data Array::set(int index, Data val)
+{
+    data[index] = val;
+}
+void Array::print()
+{
+    std::cout << "[";
+    for (int i = 0; i < this->total_size; i++)
+    {
+        this->data[i].print();
+        std::cout << ",";
+    }
+    std::cout << "]";
 }
 
 void VarStorage::declare(std::string id, Data init)

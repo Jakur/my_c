@@ -212,6 +212,53 @@ void ParmList::execute(VarStorage *state)
 {
 }
 
+Data IndexExp::evaluate(VarStorage *state)
+{
+  Data d = state->get(&this->id);
+  if (d.tag == Data::ARR)
+  {
+    std::vector<int> x{};
+    for (int i = 0; i < this->indices->exps.size(); i++)
+    {
+      Data d = this->indices->exps[i]->evaluate(state);
+      if (d.tag == Data::INT)
+      {
+        x.push_back(d.i);
+      }
+      else
+      {
+        std::cout << "Index evaluated to non-int!" << std::endl;
+        x.push_back(0);
+      }
+    }
+    return d.a->get(x);
+  }
+  else
+  {
+    std::cout << "Tried to index into a non-array!" << std::endl;
+  }
+  return Data(0);
+}
+void IndexExp::print(VarStorage *state)
+{
+  std::cout << "TODO INDEX EXP PRINT" << std::endl;
+}
+
+Data ArrayInitExp::evaluate(VarStorage *state)
+{
+  int size = this->values->exps.size();
+  auto arr = new Array(size, std::vector<int>{size});
+  for (int i = 0; i < size; i++)
+  {
+    arr->set(i, this->values->exps[size - 1 - i]->evaluate(state));
+  }
+  return Data(arr);
+}
+void ArrayInitExp::print(VarStorage *state)
+{
+  std::cout << "TODO ARRAY INIT EXP PRINT" << std::endl;
+}
+
 Data VarExp::evaluate(VarStorage *state)
 {
   return state->get(&this->id);
