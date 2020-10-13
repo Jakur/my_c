@@ -16,10 +16,15 @@ int main()
 	print f [0];
 	
 	//testing operations
-	print a + a;
-	print a - a;
-	print a * a;
-	print a / a;
+	int w = a + a;
+	int x = a - a;
+	int y = a * a;
+	int z = a / a;
+	
+	print w;
+	print x;
+	print y;
+	print z;
 	
 	//testing all booleans and if else statements
 	if 1 && 0
