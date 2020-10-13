@@ -1,5 +1,8 @@
 #include <string>
+#include "stdio.h"
+#include "iostream"
 #include <map>
+#include <vector>
 
 enum class BinaryOperator
 {
@@ -17,9 +20,14 @@ enum class BinaryOperator
     NEQ
 };
 
-class VarStorage
-{
-};
+class Array;
+
+// class Index
+// {
+//     std::vector<int> indices;
+//     Index(std::vector<int> indices) : indices{indices} {};
+//     Index(int index) : indices{index} {};
+// };
 
 class Data
 {
@@ -30,51 +38,57 @@ public:
         CHAR,
         BOOL,
         FLOAT,
+        STRING,
+        ARR,
     } tag;
     union {
         int i;
         char c;
         float f;
         bool b;
+        std::string *s;
+        Array *a;
     };
     Data(int i);
-    Data(char c);
     Data(float f);
     Data(bool b);
+    Data(char c);
+    Data(std::string *s);
+    Data(Array *a);
     Data();
     Data apply(Data *other, BinaryOperator op);
     void print();
 };
 
 Data bool_op(bool left, BinaryOperator op, bool right);
+Data num_op(int left, BinaryOperator op, int right);
+Data num_op(float left, BinaryOperator op, float right);
+Data str_op(std::string *left, BinaryOperator op, std::string *right);
 
-template <class T>
-Data num_op(T left, BinaryOperator op, T right)
+class Array
 {
-    switch (op)
-    {
-    case BinaryOperator::ADD:
-        return Data(left + right);
-    case BinaryOperator::SUB:
-        return Data(left - right);
-    case BinaryOperator::MUL:
-        return Data(left * right);
-    case BinaryOperator::DIV:
-        return Data(left / right);
-    case BinaryOperator::LTHAN:
-        return Data(left < right);
-    case BinaryOperator::LETHAN:
-        return Data(left <= right);
-    case BinaryOperator::GTHAN:
-        return Data(left > right);
-    case BinaryOperator::GETHAN:
-        return Data(left >= right);
-    case BinaryOperator::EQ:
-        return Data(left == right);
-    case BinaryOperator::NEQ:
-        return Data(left != right);
-    }
-    return Data(left);
-}
+public:
+    int total_size;
+    std::vector<int> sizes;
+    std::vector<Data> data;
+    Array(int total_size, std::vector<int> sizes) : total_size{total_size}, sizes{sizes}, data{std::vector<Data>(total_size, Data(0))} {}
+    int one_d(std::vector<int> indices);
+    Data get(std::vector<int> indices);
+    Data set(std::vector<int> indices, Data val);
+    Data set(int index, Data val);
+    void print();
+};
+
+class VarStorage
+{
+protected:
+    std::map<std::string, Data> state;
+
+public:
+    VarStorage(std::map<std::string, Data> map) : state{map} {}
+    void declare(std::string id, Data init);
+    void assign(std::string id, Data val);
+    Data get(std::string *name);
+};
 
 // std::ostream &operator<<(std::ostream &os, Data const &m);

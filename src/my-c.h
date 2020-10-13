@@ -3,6 +3,7 @@
 #include <string>
 #include <map>
 #include <list>
+#include <optional>
 #include "data.h"
 #include <vector>
 
@@ -11,30 +12,39 @@ using namespace std;
 class Exp
 {
 public:
-  virtual Data evaluate(void) = 0;
-  virtual void print(void) = 0;
-  bool to_bool(void);
+  virtual Data evaluate(VarStorage *state) = 0;
+  virtual void print(VarStorage *state) = 0;
+  bool to_bool(VarStorage *state);
 };
 
 struct Stmt
 {
-  virtual void execute(void) = 0;
-  virtual void print(void) = 0;
+  virtual void execute(VarStorage *state) = 0;
+  virtual void print(VarStorage *state) = 0;
+  virtual std::optional<Data> ret_val() = 0;
+  // std::optional<Data> ret_val(void)
+  // {
+  //   cout << "Basic bitches" << endl;
+  //   return std::optional<Data>();
+  // }
 };
 
 struct MultiStmt : Stmt
 {
   std::vector<Stmt *> stmts;
-  void execute(void);
-  void print(void);
+  void execute(VarStorage *state);
+  void print(VarStorage *state);
+  std::optional<Data> ret_val() { return std::optional<Data>(); }
   MultiStmt(Stmt *s) : stmts(std::vector<Stmt *>{s}) {}
 };
 
 struct Fn
 {
+  std::string ident;
+  std::vector<std::string> parameters;
   MultiStmt *stmts;
-  Fn(MultiStmt *s) : stmts(s) {}
-  int fn_call(void);
+  Fn(std::string ident, std::vector<std::string> parms, MultiStmt *s) : stmts(s), ident{ident}, parameters{parms} {}
+  Data fn_call(VarStorage storage);
 };
 
 struct IfStmt : Stmt
@@ -43,14 +53,26 @@ struct IfStmt : Stmt
   MultiStmt *t_branch;
   MultiStmt *f_branch;
   IfStmt(Exp *cond, MultiStmt *t, MultiStmt *f) : cond{cond}, t_branch{t}, f_branch{f} {}
-  void execute(void);
-  void print(void);
+  void execute(VarStorage *state);
+  void print(VarStorage *state);
+  std::optional<Data> ret_val() { return std::optional<Data>(); }
+};
+
+struct WhileStmt : Stmt
+{
+  Exp *cond;
+  MultiStmt *body;
+  WhileStmt(Exp *cond, MultiStmt *body) : cond{cond}, body{body} {}
+  void execute(VarStorage *state);
+  void print(VarStorage *state);
+  std::optional<Data> ret_val() { return std::optional<Data>(); }
 };
 
 struct Pass : Stmt
 {
-  void execute(void);
-  void print(void);
+  void execute(VarStorage *state);
+  void print(VarStorage *state);
+  std::optional<Data> ret_val() { return std::optional<Data>(); }
 };
 
 class AssignStmt : public Stmt
@@ -61,8 +83,9 @@ protected:
 
 public:
   AssignStmt(string name, Exp *expression);
-  void print();
-  void execute();
+  void print(VarStorage *state);
+  void execute(VarStorage *state);
+  std::optional<Data> ret_val() { return std::optional<Data>(); }
 };
 
 class PrintStmt : public Stmt
@@ -72,8 +95,20 @@ protected:
 
 public:
   PrintStmt(Exp *myexp);
-  void print();
-  void execute();
+  void print(VarStorage *state);
+  void execute(VarStorage *state);
+  std::optional<Data> ret_val() { return std::optional<Data>(); }
+};
+
+class ReturnStmt : public Stmt
+{
+public:
+  Exp *exp;
+  Data d;
+  ReturnStmt(Exp *exp) : exp{exp}, d(Data(0)) {}
+  void print(VarStorage *state);
+  void execute(VarStorage *state);
+  std::optional<Data> ret_val();
 };
 
 class BinaryExp : public Exp
@@ -88,14 +123,14 @@ public:
     this->op = op;
     this->right = right;
   }
-  Data evaluate()
+  Data evaluate(VarStorage *state)
   {
     // Todo check for nullptr ?
-    Data a = left->evaluate();
-    Data b = right->evaluate();
+    Data a = left->evaluate(state);
+    Data b = right->evaluate(state);
     return a.apply(&b, this->op);
   };
-  void print(void) { cout << "TODO"; };
+  void print(VarStorage *state) { cout << "TODO BinaryExp PRINT"; };
 };
 
 class LiteralExp : public Exp
@@ -103,14 +138,73 @@ class LiteralExp : public Exp
 public:
   Data value;
   LiteralExp(Data value) : value{value} {}
-  Data evaluate(void)
+  Data evaluate(VarStorage *state)
   {
     return this->value;
   }
-  void print(void)
+  void print(VarStorage *state)
   {
     value.print();
   };
+};
+
+class NegationExp : public Exp
+{
+public:
+  Exp *exp;
+  NegationExp(Exp *exp) : exp{exp} {}
+  Data evaluate(VarStorage *state);
+  void print(VarStorage *state);
+};
+
+class ExpList : public Stmt
+{
+public:
+  std::vector<Exp *> exps;
+  std::vector<Data> evaluated;
+  void print(VarStorage *state);
+  void execute(VarStorage *state);
+  ExpList(Exp *exp) : exps(std::vector<Exp *>{exp}), evaluated(std::vector<Data>()) {}
+  std::optional<Data> ret_val() { return std::optional<Data>(); }
+};
+
+class FnCallExp : public Exp
+{
+public:
+  std::string name;
+  ExpList *exps;
+  FnCallExp(std::string name, ExpList *exps) : name{name}, exps{exps} {}
+  Data evaluate(VarStorage *state);
+  void print(VarStorage *state);
+};
+
+class ParmList : public Stmt
+{
+public:
+  std::vector<std::string> names;
+  void print(VarStorage *state);
+  void execute(VarStorage *state);
+  ParmList(std::string s) : names(std::vector<std::string>{s}) {}
+  std::optional<Data> ret_val() { return std::optional<Data>(); }
+};
+
+class IndexExp : public Exp
+{
+public:
+  std::string id;
+  ExpList *indices;
+  IndexExp(std::string id, ExpList *indices) : id{id}, indices{indices} {}
+  Data evaluate(VarStorage *state);
+  void print(VarStorage *state);
+};
+
+class ArrayInitExp : public Exp
+{
+public:
+  ExpList *values;
+  ArrayInitExp(ExpList *values) : values{values} {}
+  Data evaluate(VarStorage *state);
+  void print(VarStorage *state);
 };
 
 class VarExp : public Exp
@@ -118,9 +212,9 @@ class VarExp : public Exp
 public:
   std::string id;
   VarExp(std::string id) : id({id}) {}
-  Data evaluate(void);
-  void print(void) { cout << this->id; };
+  Data evaluate(VarStorage *state);
+  void print(VarStorage *state) { cout << this->id; };
 };
 
 // the object at the base of our tree
-extern map<string, Data> state;
+extern map<string, Fn *> fns;

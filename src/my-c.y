@@ -35,10 +35,13 @@ BinaryOperator get_op(int x);
   int integer;
   bool boolean;
   char character;
-  char * var_name;
+  char *chars;
+  std::string *str;
   Exp *exp_node_ptr;
   Stmt *stmt_ptr;
+  ExpList *exp_list;
   MultiStmt *multi_stmt;
+  ParmList *parms;
   Fn *fn;
 }
 
@@ -48,29 +51,35 @@ BinaryOperator get_op(int x);
 %token <number> FLOAT
 %token <boolean> BOOL
 %token <character> CHAR
-%token <var_name> ID
+%token <str> STRING
+%token <chars> ID
 %token PLUS MINUS TIMES DIVIDE AND OR 
 %token SEMICOLON EQUALS PRINT LPAREN RPAREN LBRACE RBRACE LSQUARE RSQUARE
-%token PASS RETURN IF THEN ELSE END WHILE DO COMMA
-%token STRING EXCLAM
-%token T_INT T_FLOAT T_BOOL T_CHAR T_STRING
+%token LESSTHAN LESSTHANE GREATTHAN GREATTHANE NOTEQUAL EQUALTO;
+%token PASS RETURN IF THEN ELSE END WHILE DO COMMA EXCLAM
+%token T_INT T_FLOAT T_BOOL T_CHAR T_STRING T_ARRAY
+%token PCT
 // New
-%type <integer> bool_op weak_op strong_op
+%type <integer> bool_op weak_op strong_op type prim array_type
 %type <stmt_ptr> stmt var_dec asgn_stmt if_stmt while_stmt return_stmt print_stmt declaration
 %type <multi_stmt> stmts declaration_list
+%type <exp_list> exp_list dims
 %type <exp_node_ptr> exp weak_exp strong_exp not_exp num_term func_invo array_index
 %type <fn> func_decl
+%type <parms> parameter_list
 %%
 // New
 program:
-    func_decl {if (main_fn == nullptr) {main_fn = $1;}}
+    func_decl {auto f = $01; fns[f->ident] = f;}
+    | func_decl program {
+      auto f = $01; fns[f->ident] = f;
+    }
 ;
 stmts:
     stmt {$$ = new MultiStmt($01);}
   | stmt stmts {
     MultiStmt *s = $02;
     auto next = $01;
-    next->print(); 
     s->stmts.push_back(next);
     $$ = s;
   }
@@ -94,26 +103,31 @@ asgn_stmt:
 ;
 // Types 
 prim: 
-  T_INT
-  | T_FLOAT
-  | T_BOOL
-  | T_CHAR
-  | T_STRING
+  T_INT {$$ = T_INT;}
+  | T_FLOAT {$$ = T_FLOAT;}
+  | T_BOOL {$$ = T_BOOL;}
+  | T_CHAR {$$ = T_CHAR;}
+  | T_STRING {$$ = T_STRING;}
 ;
 type: 
-  prim {}
-  | array_type {}
+  prim 
+  | array_type {$$ = T_ARRAY;}
 ;
 
 dims: 
-    LSQUARE exp RSQUARE
-  | LSQUARE exp RSQUARE dims
+    LSQUARE exp RSQUARE {$$ = new ExpList($02);}
+  | LSQUARE exp RSQUARE dims {
+    ExpList *s = $04;
+    auto next = $02;
+    s->exps.push_back(next);
+    $$ = s;
+  }
 ;
 array_type: 
-  prim dims
+  prim dims {$$ = T_ARRAY;}
 ;
 array_index:
-  ID dims {new LiteralExp(Data(0));}
+  ID dims {$$ = new IndexExp($01, $02);}
 ;
 
 // Control Flow
@@ -122,7 +136,7 @@ if_stmt:
   | IF exp THEN stmts ELSE stmts END {$$ = new IfStmt($02, $04, $06);}
 ;
 while_stmt:
-  WHILE exp DO stmts END {$$ = new Pass();}
+  WHILE exp DO stmts END {$$ = new WhileStmt($02, $04);}
 ;
 
 // Operators and expressions
@@ -133,6 +147,12 @@ exp:
 bool_op:
   AND {$$ = AND;}
   | OR {$$ = OR;}
+  | LESSTHAN {$$ = LESSTHAN;}
+  | LESSTHANE {$$ = LESSTHANE;}
+  | GREATTHAN {$$ = GREATTHAN;}
+  | GREATTHANE {$$ = GREATTHANE;}
+  | NOTEQUAL {$$ = NOTEQUAL;}
+  | EQUALTO {$$ = EQUALTO;}
 ;
 weak_exp:
   strong_exp
@@ -145,7 +165,7 @@ weak_op:
 ;
 
 strong_exp:
-  not_exp 
+  not_exp
   | strong_exp strong_op not_exp {$$ = new BinaryExp($01, get_op($02), $03);}
 ;
 
@@ -155,7 +175,7 @@ strong_op:
 ;
 
 not_exp:
-  EXCLAM num_term {new LiteralExp(Data(0));}
+  EXCLAM num_term {$$ = new NegationExp($02);}
   | num_term
 ;
 
@@ -176,19 +196,26 @@ num_term:
     bool b = $01;
     $$ = new LiteralExp(Data(b));
   }
+  | CHAR {
+    char c = $01;
+    $$ = new LiteralExp(Data(c));
+  }
+  | STRING {
+    std::string *s = $01;
+    $$ = new LiteralExp(Data(s));
+  }
 ;
 
 // Var Dec 
 var_dec:
   type declaration_list SEMICOLON {$$ = $02;}
-  | type ID EQUALS LBRACE exp_list RBRACE SEMICOLON {$$ = new Pass();}
+  | type ID EQUALS LBRACE exp_list RBRACE SEMICOLON {$$ = new AssignStmt($02, new ArrayInitExp($05));}
 ; 
 declaration_list:
   declaration {$$ = new MultiStmt($01);}
   | declaration COMMA declaration_list {
     MultiStmt *s = $03;
     auto next = $01;
-    next->print(); 
     s->stmts.push_back(next);
     $$ = s;
   }
@@ -200,86 +227,35 @@ declaration:
 
 // Functions
 func_decl:
-  type ID LPAREN RPAREN stmts END {$$ = new Fn($05);}
-  | type ID LPAREN parameter_list RPAREN stmts END {} {$$ = new Fn($06);}
+  type ID LPAREN RPAREN stmts END {$$ = new Fn($02, std::vector<std::string>(), $05);}
+  | type ID LPAREN parameter_list RPAREN stmts END {} {auto p = $04; $$ = new Fn($02, p->names, $06);}
 ;
 parameter_list:
-  type ID {} 
-  | type ID COMMA parameter_list {}
+  type ID {$$ = new ParmList($02);} 
+  | type ID COMMA parameter_list {
+    ParmList *s = $04;
+    auto next = $02;
+    s->names.push_back(next);
+    $$ = s;
+  }
 ;
 func_invo:
-  ID LPAREN RPAREN {}
-  | ID LPAREN exp_list RPAREN {}
+  ID LPAREN RPAREN {$$ = new FnCallExp($01, nullptr);}
+  | ID LPAREN exp_list RPAREN {$$ = new FnCallExp($01, $03);}
 ;
 exp_list:
-  exp {}
-  | exp_list COMMA exp {}
+  exp {$$ = new ExpList($01);}
+  | exp COMMA exp_list {
+    ExpList *s = $03;
+    auto next = $01;
+    s->exps.push_back(next);
+    $$ = s;
+  }
 ;
 return_stmt:
-  RETURN ID SEMICOLON {}
+  RETURN exp SEMICOLON {$$ = new ReturnStmt($02);}
 ;
 
-
-// Old
-// program: stmtlist { root = $$; }
-// ;
-
-
-
-// stmtlist: stmtlist SEMICOLON stmt
-//             { // copy up the list and add the stmt to it
-//               $$ = new sequence_node($1,$3);
-//             }
-//          | stmtlist SEMICOLON error
-// 	   { // just copy up the stmtlist when an error occurs
-//              $$ = $1;
-//              yyclearin; } 
-//          |  stmt 
-// 	 { $$ = $1;   }
-// ;
-
-// stmt: ID EQUALS exp { 
-//   $$ = new assign_node($1, $3);
-// 	   }
-       
-// | PRINT exp {
-//   $$ = new print_node($2);
-//  }
-
-// |
-// { $$ = new skip_node();
-// }
-// | LBRACE stmtlist RBRACE { $$=$2; } 
-//  ;
-
-
-// exp:	exp PLUS mulexp { $$ = new BinaryExp($1, BinaryOperator::ADD, $3); }
-
-//       |	exp MINUS mulexp { $$ = new BinaryExp($1, BinaryOperator::SUB, $3); }
-
-//       |	mulexp {  $$ = $1; }
-// ;
-
-
-
-// mulexp:	mulexp TIMES primexp {
-// 	  $$ = new BinaryExp($1, BinaryOperator::MUL, $3); }
-
-//       | mulexp DIVIDE primexp {
-// 	  $$ = new BinaryExp($1, BinaryOperator::DIV, $3); }
-
-//       | primexp { $$=$1;  }
-// ;
-
-
-// // Fix negation
-// primexp:	LPAREN exp RPAREN  {  $$ = $2; }
-
-//       |	NUMBER { $$ = new LiteralExp(Data($1)); }
-
-//       | ID { $$ = new VarExp($1); }
-// ;
- 
 %%
 int main(int argc, char **argv)
 { 
@@ -287,16 +263,26 @@ int main(int argc, char **argv)
 
   //  yydebug = 1;
   yyparse();
+  cout << "Testing something..." << endl;
+  auto x = new Array(2 * 3 * 4, std::vector<int>{2, 3, 4});
+  cout << "Data size " << x->data.size() << endl;
+  for (int i = 0; i < x->sizes.size(); i++) {
+    cout << x->sizes[i] << endl;
+  }
+  cout << "Got here" << endl;
+  x->get(std::vector<int>{0, 0, 0});
+  cout << "End Test" << endl;
 
   cout << "---------- list of input program------------" << endl << endl;
   // root -> print();
-
+  cout << "Size: " << fns.size() << endl;
+  main_fn = fns["main"];
   cout << "---------- execution of input program------------" << endl << endl;
   if (main_fn == nullptr) {
     cout << "NULL MAIN" << endl;
   } else {
     cout << "main() statement count: " << main_fn->stmts->stmts.size() << endl;
-    main_fn->fn_call();
+    main_fn->fn_call(VarStorage(map<string, Data>()));
   }
 
   cout << "Finished Testing" << endl;
@@ -310,6 +296,12 @@ BinaryOperator get_op(int x) {
     case DIVIDE: return BinaryOperator::DIV;
     case AND: return BinaryOperator::BAND;
     case OR: return BinaryOperator::BOR;
+    case LESSTHAN: return BinaryOperator::LTHAN;
+    case LESSTHANE: return BinaryOperator::LETHAN;
+    case GREATTHAN: return BinaryOperator::GTHAN;
+    case GREATTHANE: return BinaryOperator::GETHAN;
+    case NOTEQUAL: return BinaryOperator::NEQ;
+    case EQUALTO: return BinaryOperator::EQ;
   }
   cout << "Unknown binary operator with number " << x << endl;
   return BinaryOperator::ADD; 

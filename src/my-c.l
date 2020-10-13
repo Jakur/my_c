@@ -38,18 +38,42 @@ LETTER [a-zA-Z]
 %}
 
 print   { return PRINT; }
-{DIGIT}+[.]{DIGIT}* {
+[-]?{DIGIT}+[.]{DIGIT}* {
 	yylval.number = atof(yytext); return FLOAT;
 	}
-{DIGIT}+ {
+[-]?{DIGIT}+ {
         yylval.integer = atoi(yytext); return INTEGER;
 }
 "true" {yylval.boolean = true; return BOOL;}
 "false" {yylval.boolean = false; return BOOL;}
-['][0-9a-zA-Z]['] {yylval.character = yytext[0]; return CHAR;}
+\'[0-9a-zA-Z ]\' {
+        char* str = yytext;
+        char next = *(++str);
+        yylval.character = next; 
+        return CHAR;
+}
+\"[0-9a-zA-Z ]*\" {
+        auto s = new std::string(); 
+        char* str = yytext;
+        for(char* it = ++str; *it; ++it) {
+                s->push_back(*it);
+        }
+        s->pop_back(); // Remove trailing quote
+        yylval.str = s; 
+        return STRING;
+}
 
 
 [ \t\f\r]	;		 // ignore white space 
+
+"&&" {return AND;}
+"||" {return OR;}
+"<" {return LESSTHAN;}
+"<=" {return LESSTHANE;}
+">" {return GREATTHAN;}
+">=" {return GREATTHANE;}
+"!=" {return NOTEQUAL;}
+"==" {return EQUALTO;}
 
 \n      { line_num++; }
 "-"	{ return MINUS;  }
@@ -65,8 +89,6 @@ print   { return PRINT; }
 "="     { return EQUALS; }
 ";"    {return SEMICOLON;}
 
-"&&" {return AND;}
-"||" {return OR;}
 "int" {return T_INT;}
 "float" {return T_FLOAT;}
 "bool" {return T_BOOL;}
@@ -86,7 +108,7 @@ print   { return PRINT; }
 "end" {return END;}
 
 {LETTER}[0-9a-zA-Z]* {
-        yylval.var_name = strdup(yytext); return ID;
+        yylval.chars = strdup(yytext); return ID;
 	}
 
 . { BEGIN(ERROR); yymore(); }
