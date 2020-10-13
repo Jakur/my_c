@@ -5,7 +5,7 @@ int main()
   int fact = 1;
   
   //finds the factorial of a number
-  while (i <= n)
+  while (i <= n) do
     fact = fact * i;
 	i = i + 1;
   end

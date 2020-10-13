@@ -6,17 +6,17 @@ int main()
   int z = 6;
 	
   //print x if its largest number
-  if ( x >= y && x >= z )
+  if ( x >= y && x >= z ) then
     print x;
   end
 	
   //print y if its the largest number
-  if ( y >= x && y >= z)
+  if ( y >= x && y >= z) then
     print y;
   end
 	
   //print z if it the largest number
-  if (z >= x && z >= y)
+  if (z >= x && z >= y) then
     print z;
   end
 

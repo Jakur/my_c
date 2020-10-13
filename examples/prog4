@@ -6,7 +6,7 @@ int main()
   int n = 50;
   
   //calculates the sum of ints from 1 to n
-  while (i <= n)
+  while (i <= n) do
     sum = sum + i;
     i = i + 1;
   end
