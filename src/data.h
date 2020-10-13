@@ -20,14 +20,9 @@ enum class BinaryOperator
     NEQ
 };
 
-class Array;
+void print_op(BinaryOperator op);
 
-// class Index
-// {
-//     std::vector<int> indices;
-//     Index(std::vector<int> indices) : indices{indices} {};
-//     Index(int index) : indices{index} {};
-// };
+class Array;
 
 class Data
 {
@@ -90,5 +85,3 @@ public:
     void assign(std::string id, Data val);
     Data get(std::string *name);
 };
-
-// std::ostream &operator<<(std::ostream &os, Data const &m);

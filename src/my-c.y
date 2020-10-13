@@ -263,17 +263,13 @@ int main(int argc, char **argv)
 
   //  yydebug = 1;
   yyparse();
-  cout << "Testing something..." << endl;
-  auto x = new Array(2 * 3 * 4, std::vector<int>{2, 3, 4});
-  cout << "Data size " << x->data.size() << endl;
-  for (int i = 0; i < x->sizes.size(); i++) {
-    cout << x->sizes[i] << endl;
-  }
-  cout << "Got here" << endl;
-  x->get(std::vector<int>{0, 0, 0});
-  cout << "End Test" << endl;
 
   cout << "---------- list of input program------------" << endl << endl;
+  map<string, Fn *>::iterator it;
+  for (it = fns.begin(); it != fns.end(); it++) {
+    std::cout << "Fn " << it->first << ": " << endl;
+    it->second->print();
+  }
   // root -> print();
   cout << "Size: " << fns.size() << endl;
   main_fn = fns["main"];
@@ -281,11 +277,8 @@ int main(int argc, char **argv)
   if (main_fn == nullptr) {
     cout << "NULL MAIN" << endl;
   } else {
-    cout << "main() statement count: " << main_fn->stmts->stmts.size() << endl;
     main_fn->fn_call(VarStorage(map<string, Data>()));
   }
-
-  cout << "Finished Testing" << endl;
 }
 
 BinaryOperator get_op(int x) {

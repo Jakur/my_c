@@ -21,12 +21,17 @@ bool Exp::to_bool(VarStorage *state)
   return false;
 }
 
-void MultiStmt::execute(VarStorage *state)
+std::optional<Data> MultiStmt::execute(VarStorage *state)
 {
   for (int i = this->stmts.size() - 1; i >= 0; i--)
   {
-    this->stmts[i]->execute(state);
+    auto res = this->stmts[i]->execute(state);
+    if (res.has_value())
+    {
+      return res;
+    }
   }
+  return {};
 }
 void MultiStmt::print(VarStorage *state)
 {
@@ -38,55 +43,70 @@ void MultiStmt::print(VarStorage *state)
 
 Data Fn::fn_call(VarStorage storage)
 {
-  for (int i = stmts->stmts.size() - 1; i >= 0; i--)
+  auto ret = this->stmts->execute(&storage);
+  if (ret.has_value())
   {
-    auto x = stmts->stmts[i];
-    if (x == nullptr)
-    {
-      cout << "NULL STMT!";
-      return -1;
-    }
-    x->execute(&storage);
-    auto ret = x->ret_val();
-    if (ret.has_value())
-    {
-      return ret.value();
-    }
+    return ret.value();
   }
   return Data(0);
 }
 
-void IfStmt::execute(VarStorage *state)
+void Fn::print()
+{
+  VarStorage st = VarStorage(map<string, Data>());
+  this->stmts->print(&st);
+}
+
+std::optional<Data> IfStmt::execute(VarStorage *state)
 {
   if (this->cond->to_bool(state))
   {
-    this->t_branch->execute(state);
+    return this->t_branch->execute(state);
   }
   else if (this->f_branch != nullptr)
   {
-    this->f_branch->execute(state);
+    return this->f_branch->execute(state);
   }
+  return {};
 }
 void IfStmt::print(VarStorage *state)
 {
-  cout << "TODO IF STMT PRINT" << endl;
+  cout << "if ";
+  this->cond->print(state);
+  cout << " then ";
+  this->t_branch->print(state);
+  if (this->f_branch != nullptr)
+  {
+    cout << " else ";
+    this->f_branch->print(state);
+  }
+  cout << "end" << endl;
 }
 
-void WhileStmt::execute(VarStorage *state)
+std::optional<Data> WhileStmt::execute(VarStorage *state)
 {
   while (this->cond->to_bool(state))
   {
-
-    this->body->execute(state);
+    auto res = this->body->execute(state);
+    if (res.has_value())
+    {
+      return res;
+    }
   }
+  return {};
 }
 void WhileStmt::print(VarStorage *state)
 {
-  cout << "TODO WHILE STMT PRINT" << endl;
+  cout << "while ";
+  this->cond->print(state);
+  cout << "do ";
+  this->body->print(state);
+  cout << "end " << endl;
 }
 
-void Pass::execute(VarStorage *state)
+std::optional<Data> Pass::execute(VarStorage *state)
 {
+  return {};
 }
 void Pass::print(VarStorage *state)
 {
@@ -103,10 +123,11 @@ void AssignStmt::print(VarStorage *state)
   cout << endl;
 }
 
-void AssignStmt::execute(VarStorage *state)
+std::optional<Data> AssignStmt::execute(VarStorage *state)
 {
   Data result = exp->evaluate(state);
   state->assign(id, result);
+  return {};
 }
 
 PrintStmt::PrintStmt(Exp *myexp) : exp(myexp) {}
@@ -118,29 +139,23 @@ void PrintStmt::print(VarStorage *state)
   cout << endl;
 }
 
-void PrintStmt::execute(VarStorage *state)
+std::optional<Data> PrintStmt::execute(VarStorage *state)
 {
-  cout << "PRINTING: ";
   exp->evaluate(state).print();
   cout << endl;
+  return {};
 }
 
-void ReturnStmt::execute(VarStorage *state)
+std::optional<Data> ReturnStmt::execute(VarStorage *state)
 {
-  this->d = exp->evaluate(state);
+  return exp->evaluate(state);
 }
 
 void ReturnStmt::print(VarStorage *state)
 {
   cout << "Return ";
   exp->print(state);
-  this->ret_val();
   cout << endl;
-}
-
-std::optional<Data> ReturnStmt::ret_val(void)
-{
-  return std::optional<Data>(this->d);
 }
 
 Data FnCallExp::evaluate(VarStorage *state)
@@ -195,21 +210,40 @@ void ExpList::print(VarStorage *state)
   }
   std::cout << endl;
 }
-void ExpList::execute(VarStorage *state)
+std::optional<Data> ExpList::execute(VarStorage *state)
 {
   for (int i = this->exps.size() - 1; i >= 0; i--)
   {
     Data d = this->exps[i]->evaluate(state);
     this->evaluated.push_back(d);
   }
+  return {};
+}
+
+Data BinaryExp::evaluate(VarStorage *state)
+{
+  // Todo check for nullptr ?
+  Data a = left->evaluate(state);
+  Data b = right->evaluate(state);
+  return a.apply(&b, this->op);
+};
+
+void BinaryExp::print(VarStorage *state)
+{
+  std::cout << "(";
+  this->left->print(state);
+  print_op(this->op);
+  this->right->print(state);
+  std::cout << ")";
 }
 
 void ParmList::print(VarStorage *state)
 {
   std::cout << "TODO Parameter List Print" << std::endl;
 }
-void ParmList::execute(VarStorage *state)
+std::optional<Data> ParmList::execute(VarStorage *state)
 {
+  return {};
 }
 
 Data IndexExp::evaluate(VarStorage *state)
