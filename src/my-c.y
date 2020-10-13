@@ -265,6 +265,11 @@ int main(int argc, char **argv)
   yyparse();
 
   cout << "---------- list of input program------------" << endl << endl;
+  map<string, Fn *>::iterator it;
+  for (it = fns.begin(); it != fns.end(); it++) {
+    std::cout << "Fn " << it->first << ": " << endl;
+    it->second->print();
+  }
   // root -> print();
   cout << "Size: " << fns.size() << endl;
   main_fn = fns["main"];

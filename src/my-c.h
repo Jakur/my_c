@@ -38,6 +38,7 @@ struct Fn
   MultiStmt *stmts;
   Fn(std::string ident, std::vector<std::string> parms, MultiStmt *s) : stmts(s), ident{ident}, parameters{parms} {}
   Data fn_call(VarStorage storage);
+  void print();
 };
 
 struct IfStmt : Stmt
@@ -104,20 +105,9 @@ public:
   Exp *left;
   Exp *right;
   BinaryOperator op;
-  BinaryExp(Exp *left, BinaryOperator op, Exp *right)
-  {
-    this->left = left;
-    this->op = op;
-    this->right = right;
-  }
-  Data evaluate(VarStorage *state)
-  {
-    // Todo check for nullptr ?
-    Data a = left->evaluate(state);
-    Data b = right->evaluate(state);
-    return a.apply(&b, this->op);
-  };
-  void print(VarStorage *state) { cout << "TODO BinaryExp PRINT"; };
+  BinaryExp(Exp *left, BinaryOperator op, Exp *right) : left{left}, op{op}, right{right} {}
+  Data evaluate(VarStorage *state);
+  void print(VarStorage *state);
 };
 
 class LiteralExp : public Exp

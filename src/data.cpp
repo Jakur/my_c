@@ -2,6 +2,49 @@
 #include "stdio.h"
 #include "iostream"
 
+void print_op(BinaryOperator op)
+{
+    switch (op)
+    {
+    case BinaryOperator::MUL:
+        std::cout << "*";
+        break;
+    case BinaryOperator::DIV:
+        std::cout << "/";
+        break;
+    case BinaryOperator::ADD:
+        std::cout << "+";
+        break;
+    case BinaryOperator::SUB:
+        std::cout << "-";
+        break;
+    case BinaryOperator::BAND:
+        std::cout << "&&";
+        break;
+    case BinaryOperator::BOR:
+        std::cout << "||";
+        break;
+    case BinaryOperator::LTHAN:
+        std::cout << "<";
+        break;
+    case BinaryOperator::LETHAN:
+        std::cout << "<=";
+        break;
+    case BinaryOperator::GTHAN:
+        std::cout << ">";
+        break;
+    case BinaryOperator::GETHAN:
+        std::cout << ">=";
+        break;
+    case BinaryOperator::EQ:
+        std::cout << "==";
+        break;
+    case BinaryOperator::NEQ:
+        std::cout << "!=";
+        break;
+    }
+}
+
 Data::Data(bool b) : tag{Data::BOOL}, b{b} {}
 Data::Data(int i) : tag{Data::INT}, i{i} {}
 Data::Data(float f) : tag{Data::FLOAT}, f{f} {}

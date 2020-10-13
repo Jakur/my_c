@@ -48,8 +48,13 @@ Data Fn::fn_call(VarStorage storage)
   {
     return ret.value();
   }
-
   return Data(0);
+}
+
+void Fn::print()
+{
+  VarStorage st = VarStorage(map<string, Data>());
+  this->stmts->print(&st);
 }
 
 std::optional<Data> IfStmt::execute(VarStorage *state)
@@ -66,7 +71,16 @@ std::optional<Data> IfStmt::execute(VarStorage *state)
 }
 void IfStmt::print(VarStorage *state)
 {
-  cout << "TODO IF STMT PRINT" << endl;
+  cout << "if ";
+  this->cond->print(state);
+  cout << " then ";
+  this->t_branch->print(state);
+  if (this->f_branch != nullptr)
+  {
+    cout << " else ";
+    this->f_branch->print(state);
+  }
+  cout << "end" << endl;
 }
 
 std::optional<Data> WhileStmt::execute(VarStorage *state)
@@ -83,7 +97,11 @@ std::optional<Data> WhileStmt::execute(VarStorage *state)
 }
 void WhileStmt::print(VarStorage *state)
 {
-  cout << "TODO WHILE STMT PRINT" << endl;
+  cout << "while ";
+  this->cond->print(state);
+  cout << "do ";
+  this->body->print(state);
+  cout << "end " << endl;
 }
 
 std::optional<Data> Pass::execute(VarStorage *state)
@@ -123,7 +141,6 @@ void PrintStmt::print(VarStorage *state)
 
 std::optional<Data> PrintStmt::execute(VarStorage *state)
 {
-  cout << "PRINTING: ";
   exp->evaluate(state).print();
   cout << endl;
   return {};
@@ -201,6 +218,23 @@ std::optional<Data> ExpList::execute(VarStorage *state)
     this->evaluated.push_back(d);
   }
   return {};
+}
+
+Data BinaryExp::evaluate(VarStorage *state)
+{
+  // Todo check for nullptr ?
+  Data a = left->evaluate(state);
+  Data b = right->evaluate(state);
+  return a.apply(&b, this->op);
+};
+
+void BinaryExp::print(VarStorage *state)
+{
+  std::cout << "(";
+  this->left->print(state);
+  print_op(this->op);
+  this->right->print(state);
+  std::cout << ")";
 }
 
 void ParmList::print(VarStorage *state)

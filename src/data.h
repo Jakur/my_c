@@ -20,6 +20,8 @@ enum class BinaryOperator
     NEQ
 };
 
+void print_op(BinaryOperator op);
+
 class Array;
 
 class Data
