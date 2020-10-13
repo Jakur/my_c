@@ -15,6 +15,12 @@ int main()
 	print e;
 	print f [0];
 	
+	//testing operations
+	print a + a;
+	print a - a;
+	print a * a;
+	print a / a
+	
 	//testing all booleans and if else statements
 	if 1 && 0
 		then print true;
@@ -55,4 +61,15 @@ int main()
 		then print true;
 		else print false;
 	end
+	
+	//Testing while loop
+	int i = 0;
+	while i != 5
+	  do
+	    i = i + 1;
+	  end
+	print i;
+	
+	
+	
 end
