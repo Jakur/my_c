@@ -58,6 +58,16 @@ struct IfStmt : Stmt
   std::optional<Data> ret_val() { return std::optional<Data>(); }
 };
 
+struct WhileStmt : Stmt
+{
+  Exp *cond;
+  MultiStmt *body;
+  WhileStmt(Exp *cond, MultiStmt *body) : cond{cond}, body{body} {}
+  void execute(VarStorage *state);
+  void print(VarStorage *state);
+  std::optional<Data> ret_val() { return std::optional<Data>(); }
+};
+
 struct Pass : Stmt
 {
   void execute(VarStorage *state);

@@ -1,0 +1,17 @@
+int main()
+	int sum = 0;
+	sum = 0;
+	int i = 1;
+	int n = 50;
+	while i <= n do
+		sum = sum + i;
+		i = i + 1;
+	end
+	print sum;
+	if sum == sumZeroN(n) then print "Correct"; end
+end
+
+int sumZeroN(int n)
+	return n * (n + 1) / 2;
+end
+  

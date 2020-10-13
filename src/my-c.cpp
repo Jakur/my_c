@@ -38,7 +38,6 @@ void MultiStmt::print(VarStorage *state)
 
 Data Fn::fn_call(VarStorage storage)
 {
-  cout << "Calling Fn" << endl;
   for (int i = stmts->stmts.size() - 1; i >= 0; i--)
   {
     auto x = stmts->stmts[i];
@@ -71,6 +70,19 @@ void IfStmt::execute(VarStorage *state)
 void IfStmt::print(VarStorage *state)
 {
   cout << "TODO IF STMT PRINT" << endl;
+}
+
+void WhileStmt::execute(VarStorage *state)
+{
+  while (this->cond->to_bool(state))
+  {
+
+    this->body->execute(state);
+  }
+}
+void WhileStmt::print(VarStorage *state)
+{
+  cout << "TODO WHILE STMT PRINT" << endl;
 }
 
 void Pass::execute(VarStorage *state)

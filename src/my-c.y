@@ -132,7 +132,7 @@ if_stmt:
   | IF exp THEN stmts ELSE stmts END {$$ = new IfStmt($02, $04, $06);}
 ;
 while_stmt:
-  WHILE exp DO stmts END {$$ = new Pass();}
+  WHILE exp DO stmts END {$$ = new WhileStmt($02, $04);}
 ;
 
 // Operators and expressions
