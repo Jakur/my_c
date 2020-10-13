@@ -22,13 +22,6 @@ enum class BinaryOperator
 
 class Array;
 
-// class Index
-// {
-//     std::vector<int> indices;
-//     Index(std::vector<int> indices) : indices{indices} {};
-//     Index(int index) : indices{index} {};
-// };
-
 class Data
 {
 public:
@@ -90,5 +83,3 @@ public:
     void assign(std::string id, Data val);
     Data get(std::string *name);
 };
-
-// std::ostream &operator<<(std::ostream &os, Data const &m);

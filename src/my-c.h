@@ -28,7 +28,6 @@ struct MultiStmt : Stmt
   std::vector<Stmt *> stmts;
   std::optional<Data> execute(VarStorage *state);
   void print(VarStorage *state);
-  std::optional<Data> ret_val() { return std::optional<Data>(); }
   MultiStmt(Stmt *s) : stmts(std::vector<Stmt *>{s}) {}
 };
 
@@ -49,7 +48,6 @@ struct IfStmt : Stmt
   IfStmt(Exp *cond, MultiStmt *t, MultiStmt *f) : cond{cond}, t_branch{t}, f_branch{f} {}
   std::optional<Data> execute(VarStorage *state);
   void print(VarStorage *state);
-  std::optional<Data> ret_val() { return std::optional<Data>(); }
 };
 
 struct WhileStmt : Stmt
@@ -59,14 +57,12 @@ struct WhileStmt : Stmt
   WhileStmt(Exp *cond, MultiStmt *body) : cond{cond}, body{body} {}
   std::optional<Data> execute(VarStorage *state);
   void print(VarStorage *state);
-  std::optional<Data> ret_val() { return std::optional<Data>(); }
 };
 
 struct Pass : Stmt
 {
   std::optional<Data> execute(VarStorage *state);
   void print(VarStorage *state);
-  std::optional<Data> ret_val() { return std::optional<Data>(); }
 };
 
 class AssignStmt : public Stmt
@@ -79,7 +75,6 @@ public:
   AssignStmt(string name, Exp *expression);
   void print(VarStorage *state);
   std::optional<Data> execute(VarStorage *state);
-  std::optional<Data> ret_val() { return std::optional<Data>(); }
 };
 
 class PrintStmt : public Stmt
@@ -91,7 +86,6 @@ public:
   PrintStmt(Exp *myexp);
   void print(VarStorage *state);
   std::optional<Data> execute(VarStorage *state);
-  std::optional<Data> ret_val() { return std::optional<Data>(); }
 };
 
 class ReturnStmt : public Stmt
@@ -102,7 +96,6 @@ public:
   ReturnStmt(Exp *exp) : exp{exp}, d(Data(0)) {}
   void print(VarStorage *state);
   std::optional<Data> execute(VarStorage *state);
-  std::optional<Data> ret_val();
 };
 
 class BinaryExp : public Exp
