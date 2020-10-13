@@ -111,15 +111,13 @@ Data VarExp::evaluate()
   return Data(d);
 }
 
-//I'm not sure if I was suposed to do all of these or if there is anything else to add
-//would this work for arrays
 Data ArrayExp::evaluate()
 {
   auto a = state.at(this->id);
   return Data(a);
 }
 
-//Is this for loop correct or should I be printing it differently?
+
 void ArrayExp::printArray()
 {
   cout << "Array " << id << " values: ";
@@ -130,14 +128,14 @@ void ArrayExp::printArray()
   cout << endl;
 }
 
-//Printing specific index, need feedback if this is correct
+
 void ArrayExp::printIndex()
 {
   cout << "Array " << id << " value: ";
   cout << this->Exp[this->id] << endl;
 }
 
-//Would this add a value at the index?
+
 void ArrayExp::execute()
 {
   Data result = exp->evaluate();
