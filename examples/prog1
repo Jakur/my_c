@@ -1,0 +1,71 @@
+int main()
+        print "Begin Program";
+	int a = 42;
+	float b = 1.01 + 1.01;
+	char c = 'c';
+	bool d = true;
+	string e = "hello" + " world";
+	print a;
+	print b;
+	print c;
+	print d;
+	print e;
+	
+	int w = a + a;
+	int x = a - a;
+	int y = a * a;
+	int z = a / a;
+	
+	print w;
+	print x;
+	print y;
+	print z;
+	
+	if true && false
+		then print "NOK";
+		else print "OK";
+	end
+	
+	if true || false
+		then print "OK";
+		else print "NOK";
+	end
+	
+	if 1 < 0
+		then print "NOK";
+		else print "OK";
+	end
+
+	if 1 <= 0
+		then print "NOK";
+		else print "OK";
+	end
+	
+	if 1 > 0
+		then print "OK";
+		else print "NOK";
+	end
+	
+	if 1 >= 0
+		then print "OK";
+		else print "NOK";
+	end
+	
+	if 1 == 0
+		then print "NOK";
+		else print "OK";
+	end
+	
+	if 1 != 0
+		then print "OK";
+		else print "NOK";
+	end
+	
+	int i = 0;
+	while i != 5
+	  do
+	    i = i + 1;
+	  end
+	if i == 5 then print "OK"; else print "NOK"; end
+	
+end
