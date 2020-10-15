@@ -67,6 +67,7 @@ public:
     std::vector<int> sizes;
     std::vector<Data> data;
     Array(int total_size, std::vector<int> sizes) : total_size{total_size}, sizes{sizes}, data{std::vector<Data>(total_size, Data(0))} {}
+    Array(int total_size, std::vector<int> sizes, std::vector<Data> data) : total_size{total_size}, sizes{sizes}, data{data} {}
     int one_d(std::vector<int> indices);
     Data get(std::vector<int> indices);
     Data set(std::vector<int> indices, Data val);

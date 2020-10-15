@@ -41,6 +41,10 @@ struct Fn
   void print();
 };
 
+struct DeclareStmt : Stmt
+{
+};
+
 struct IfStmt : Stmt
 {
   Exp *cond;
@@ -173,11 +177,22 @@ public:
   void print(VarStorage *state);
 };
 
+struct DataType : public Exp
+{
+  Data init;
+  ExpList *e;
+  Data evaluate(VarStorage *state);
+  void print(VarStorage *state);
+  DataType(Data init) : init{init} {}
+  DataType(Data init, ExpList *e) : init{init}, e{e} {}
+};
+
 class ArrayInitExp : public Exp
 {
 public:
+  DataType *ty;
   ExpList *values;
-  ArrayInitExp(ExpList *values) : values{values} {}
+  ArrayInitExp(DataType *ty, ExpList *values) : ty{ty}, values{values} {}
   Data evaluate(VarStorage *state);
   void print(VarStorage *state);
 };

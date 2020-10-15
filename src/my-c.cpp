@@ -4,6 +4,7 @@
 #include <map>
 #include <list>
 #include "my-c.h"
+#include <algorithm>
 
 using namespace std;
 
@@ -212,6 +213,10 @@ void ExpList::print(VarStorage *state)
 }
 std::optional<Data> ExpList::execute(VarStorage *state)
 {
+  if (this->evaluated.size() > 0)
+  {
+    std::cout << "Warning evaluating already used ExpList!" << std::endl;
+  }
   for (int i = this->exps.size() - 1; i >= 0; i--)
   {
     Data d = this->exps[i]->evaluate(state);
@@ -281,11 +286,34 @@ void IndexExp::print(VarStorage *state)
 Data ArrayInitExp::evaluate(VarStorage *state)
 {
   int size = this->values->exps.size();
-  auto arr = new Array(size, std::vector<int>{size});
+  if (this->ty == nullptr)
+  {
+    std::cout << "Warning DataType is null!";
+  }
+  auto arr_data = this->ty->evaluate(state);
+  auto arr = arr_data.a;
+  if (size != arr->total_size)
+  {
+    std::cout << "Warning array not fully initialized" << std::endl;
+  }
+  std::reverse(this->values->exps.begin(), this->values->exps.end());
   for (int i = 0; i < size; i++)
   {
-    arr->set(i, this->values->exps[size - 1 - i]->evaluate(state));
+    arr->set(i, this->values->exps[i]->evaluate(state));
   }
+  std::cout << "Printing off: " << std::endl;
+  for (int j = 0; j < 3; j++)
+  {
+    for (int i = 0; i < 2; i++)
+    {
+      Data d = arr->get(std::vector<int>{i, j});
+      if (d.tag == Data::INT)
+      {
+        std::cout << arr->get(std::vector<int>{i, j}).i;
+      }
+    }
+  }
+  std::cout << std::endl;
   return Data(arr);
 }
 void ArrayInitExp::print(VarStorage *state)
@@ -296,6 +324,51 @@ void ArrayInitExp::print(VarStorage *state)
 Data VarExp::evaluate(VarStorage *state)
 {
   return state->get(&this->id);
+}
+
+Data DataType::evaluate(VarStorage *state)
+{
+  if (this->e != nullptr)
+  {
+    this->e->execute(state);
+    int total = 1;
+    auto sizes = std::vector<int>();
+    for (int i = 0; i < this->e->evaluated.size(); ++i)
+    {
+      auto d = this->e->evaluated[i];
+      if (d.tag == Data::INT)
+      {
+        sizes.push_back(d.i);
+        total *= d.i;
+      }
+      else
+      {
+        std::cout << "Array index size is not an integer! Defaulting to size 1" << std::endl;
+        sizes.push_back(1);
+      }
+    }
+    auto arr_data = std::vector<Data>(total, this->init);
+    std::reverse(sizes.begin(), sizes.end());
+    return Data(new Array(total, sizes, arr_data));
+  }
+  else
+  {
+    return this->init;
+  }
+}
+
+void DataType::print(VarStorage *state)
+{
+  if (this->e != nullptr)
+  {
+    std::cout << "Array with initial value";
+    this->init.print();
+  }
+  else
+  {
+    std::cout << "Type with initial value";
+    this->init.print();
+  }
 }
 
 map<string, Fn *> fns;

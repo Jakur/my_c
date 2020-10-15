@@ -43,6 +43,7 @@ BinaryOperator get_op(int x);
   MultiStmt *multi_stmt;
   ParmList *parms;
   Fn *fn;
+  DataType *type_info;
 }
 
 // %define parse.error verbose
@@ -58,9 +59,9 @@ BinaryOperator get_op(int x);
 %token LESSTHAN LESSTHANE GREATTHAN GREATTHANE NOTEQUAL EQUALTO;
 %token PASS RETURN IF THEN ELSE END WHILE DO COMMA EXCLAM
 %token T_INT T_FLOAT T_BOOL T_CHAR T_STRING T_ARRAY
-%token PCT
 // New
-%type <integer> bool_op weak_op strong_op type prim array_type
+%type <type_info> prim array_type type
+%type <integer> bool_op weak_op strong_op
 %type <stmt_ptr> stmt var_dec asgn_stmt if_stmt while_stmt return_stmt print_stmt declaration
 %type <multi_stmt> stmts declaration_list
 %type <exp_list> exp_list dims
@@ -103,15 +104,15 @@ asgn_stmt:
 ;
 // Types 
 prim: 
-  T_INT {$$ = T_INT;}
-  | T_FLOAT {$$ = T_FLOAT;}
-  | T_BOOL {$$ = T_BOOL;}
-  | T_CHAR {$$ = T_CHAR;}
-  | T_STRING {$$ = T_STRING;}
+  T_INT {$$ = new DataType(Data(0));}
+  | T_FLOAT {$$ = new DataType(Data(0.0f));}
+  | T_BOOL {$$ = new DataType(Data(false));}
+  | T_CHAR {$$ = new DataType(Data('a'));}
+  | T_STRING {$$ = new DataType(Data(""));}
 ;
 type: 
   prim 
-  | array_type {$$ = T_ARRAY;}
+  | array_type
 ;
 
 dims: 
@@ -124,7 +125,12 @@ dims:
   }
 ;
 array_type: 
-  prim dims {$$ = T_ARRAY;}
+  prim dims {
+    auto init = $01;
+    ExpList *s = $02;
+    Data d = Data(&(init->init));
+    $$ = new DataType(d, s);
+    }
 ;
 array_index:
   ID dims {$$ = new IndexExp($01, $02);}
@@ -209,7 +215,12 @@ num_term:
 // Var Dec 
 var_dec:
   type declaration_list SEMICOLON {$$ = $02;}
-  | type ID EQUALS LBRACE exp_list RBRACE SEMICOLON {$$ = new AssignStmt($02, new ArrayInitExp($05));}
+  | type ID EQUALS LBRACE exp_list RBRACE SEMICOLON {
+    DataType *d = $01;
+    ExpList *e = $05;
+    ArrayInitExp *a = new ArrayInitExp(d, e);
+    $$ = new AssignStmt($02, a);
+  }
 ; 
 declaration_list:
   declaration {$$ = new MultiStmt($01);}
