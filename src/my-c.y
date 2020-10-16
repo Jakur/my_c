@@ -232,7 +232,7 @@ declaration_list:
   }
 ;
 declaration:
-  ID {$$ = new Pass();}
+  ID {$$ = new DeclareStmt($01);}
   | ID EQUALS exp {$$ = new AssignStmt($01, $03);}
 ;
 
@@ -271,8 +271,7 @@ return_stmt:
 int main(int argc, char **argv)
 { 
   if (argc>1) yyin=fopen(argv[1],"r");
-
-  //  yydebug = 1;
+  
   yyparse();
 
   cout << "---------- list of input program------------" << endl << endl;
@@ -281,8 +280,6 @@ int main(int argc, char **argv)
     std::cout << "Fn " << it->first << ": " << endl;
     it->second->print();
   }
-  // root -> print();
-  cout << "Size: " << fns.size() << endl;
   main_fn = fns["main"];
   cout << "---------- execution of input program------------" << endl << endl;
   if (main_fn == nullptr) {

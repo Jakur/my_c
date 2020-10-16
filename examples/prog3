@@ -1,7 +1,7 @@
 int main()
   print 1;
   int i = 2;
-  while i <= 100
+  while i <= 45
   do
     bool a = (i / 15) > ((i - 1) / 15);
     bool b = (i / 3) > ((i - 1) / 3);

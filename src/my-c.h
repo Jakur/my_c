@@ -9,6 +9,8 @@
 
 using namespace std;
 
+struct DataType;
+
 class Exp
 {
 public:
@@ -39,10 +41,6 @@ struct Fn
   Fn(std::string ident, std::vector<std::string> parms, MultiStmt *s) : stmts(s), ident{ident}, parameters{parms} {}
   Data fn_call(VarStorage storage);
   void print();
-};
-
-struct DeclareStmt : Stmt
-{
 };
 
 struct IfStmt : Stmt
@@ -99,6 +97,15 @@ public:
   Exp *exp;
   Data d;
   ReturnStmt(Exp *exp) : exp{exp}, d(Data(0)) {}
+  void print(VarStorage *state);
+  std::optional<Data> execute(VarStorage *state);
+};
+
+class DeclareStmt : public Stmt
+{
+public:
+  string id;
+  DeclareStmt(string id) : id{id} {}
   void print(VarStorage *state);
   std::optional<Data> execute(VarStorage *state);
 };

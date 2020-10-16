@@ -56,6 +56,8 @@ void Fn::print()
 {
   VarStorage st = VarStorage(map<string, Data>());
   this->stmts->print(&st);
+  cout << endl
+       << endl;
 }
 
 std::optional<Data> IfStmt::execute(VarStorage *state)
@@ -100,7 +102,7 @@ void WhileStmt::print(VarStorage *state)
 {
   cout << "while ";
   this->cond->print(state);
-  cout << "do ";
+  cout << " do ";
   this->body->print(state);
   cout << "end " << endl;
 }
@@ -159,6 +161,15 @@ void ReturnStmt::print(VarStorage *state)
   cout << endl;
 }
 
+void DeclareStmt::print(VarStorage *state)
+{
+  cout << this->id << endl;
+}
+std::optional<Data> DeclareStmt::execute(VarStorage *state)
+{
+  return {};
+}
+
 Data FnCallExp::evaluate(VarStorage *state)
 {
   Fn *f = fns[this->name];
@@ -178,7 +189,14 @@ Data FnCallExp::evaluate(VarStorage *state)
 }
 void FnCallExp::print(VarStorage *state)
 {
-  cout << "TODO FnCallExp print" << endl;
+  cout << this->name << "(";
+  int size = this->exps->exps.size();
+  for (int i = size - 1; i >= 0; i--)
+  {
+    this->exps->exps[i]->print(state);
+    cout << ", ";
+  }
+  cout << ")";
 }
 
 Data NegationExp::evaluate(VarStorage *state)
@@ -209,7 +227,6 @@ void ExpList::print(VarStorage *state)
     this->exps[i]->print(state);
     std::cout << ", ";
   }
-  std::cout << endl;
 }
 std::optional<Data> ExpList::execute(VarStorage *state)
 {
@@ -227,7 +244,6 @@ std::optional<Data> ExpList::execute(VarStorage *state)
 
 Data BinaryExp::evaluate(VarStorage *state)
 {
-  // Todo check for nullptr ?
   Data a = left->evaluate(state);
   Data b = right->evaluate(state);
   return a.apply(&b, this->op);
@@ -280,7 +296,9 @@ Data IndexExp::evaluate(VarStorage *state)
 }
 void IndexExp::print(VarStorage *state)
 {
-  std::cout << "TODO INDEX EXP PRINT" << std::endl;
+  cout << this->id << "[";
+  this->indices->print(state);
+  cout << "]";
 }
 
 Data ArrayInitExp::evaluate(VarStorage *state)
@@ -301,24 +319,13 @@ Data ArrayInitExp::evaluate(VarStorage *state)
   {
     arr->set(i, this->values->exps[i]->evaluate(state));
   }
-  std::cout << "Printing off: " << std::endl;
-  for (int j = 0; j < 3; j++)
-  {
-    for (int i = 0; i < 2; i++)
-    {
-      Data d = arr->get(std::vector<int>{i, j});
-      if (d.tag == Data::INT)
-      {
-        std::cout << arr->get(std::vector<int>{i, j}).i;
-      }
-    }
-  }
-  std::cout << std::endl;
   return Data(arr);
 }
 void ArrayInitExp::print(VarStorage *state)
 {
-  std::cout << "TODO ARRAY INIT EXP PRINT" << std::endl;
+  std::cout << "{ ";
+  this->values->print(state);
+  std::cout << "};";
 }
 
 Data VarExp::evaluate(VarStorage *state)

@@ -1,27 +1,28 @@
 int main()
-  int v = 4;
-  
-  int n = 3;
+  int n = 4;
   int m = 2;
   
-  int [n][m] a = {1, 2, 3, 4, 5, 6};
-  int answer = search(v, n, a);
-  if answer != -1
-    then print "Found Index "; print answer;
-    else print "Number not found in array";
-  end
+  int [n][m] a = {1, 2, 3, 4, 5, 6, -1, 2};
+  int answer = arrayRange(n, m, a);
+  print "Range of the array is "; 
+  print answer;
 end
 
-int search(int v, int n, int [3][2] a)
-  int i = 0;
-  while i != n
+int arrayRange(int n, int m, int [4][2] a)
+  int i = 0, j = 0;
+  int max = a[0][0];
+  int min = a[0][0];
+  while i < n
   do
-    print a[i][0];
-    if a [i] == v
-      then return i;
-      else i = i + 1;
+    while j < m 
+    do     
+      if a[i][j] > max then max = a[i][j]; end
+      if a[i][j] < min then min = a[i][j]; end
+      j = j + 1;
     end
+    i = i + 1;
+    j = 0;
   end
-  return -1;
+  return max - min;
 end
 

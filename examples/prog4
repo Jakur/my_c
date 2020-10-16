@@ -1,5 +1,5 @@
 int main()
-	int sum = 0;
+	int sum;
 	sum = 0;
 	int i = 1;
 	int n = 50;
