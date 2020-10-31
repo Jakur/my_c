@@ -273,7 +273,7 @@ int main(int argc, char **argv)
   if (argc>1) yyin=fopen(argv[1],"r");
   
   yyparse();
-
+  cout << "Hmm... " << label_num << endl;
   cout << "---------- list of input program------------" << endl << endl;
   map<string, Fn *>::iterator it;
   for (it = fns.begin(); it != fns.end(); it++) {

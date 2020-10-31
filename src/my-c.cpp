@@ -116,9 +116,6 @@ void Pass::print(VarStorage *state)
   cout << "pass" << endl;
 }
 
-AssignStmt::AssignStmt(std::string name, Exp *expression)
-    : id(name), exp(expression) {}
-
 void AssignStmt::print(VarStorage *state)
 {
   cout << id << " = ";
@@ -132,8 +129,6 @@ std::optional<Data> AssignStmt::execute(VarStorage *state)
   state->assign(id, result);
   return {};
 }
-
-PrintStmt::PrintStmt(Exp *myexp) : exp(myexp) {}
 
 void PrintStmt::print(VarStorage *state)
 {

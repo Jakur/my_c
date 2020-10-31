@@ -9,6 +9,8 @@
 
 using namespace std;
 
+static int label_num = 0;
+
 struct DataType;
 
 class Exp
@@ -27,10 +29,11 @@ struct Stmt
 
 struct MultiStmt : Stmt
 {
+  int label;
   std::vector<Stmt *> stmts;
   std::optional<Data> execute(VarStorage *state);
   void print(VarStorage *state);
-  MultiStmt(Stmt *s) : stmts(std::vector<Stmt *>{s}) {}
+  MultiStmt(Stmt *s) : stmts(std::vector<Stmt *>{s}), label{label_num++} {}
 };
 
 struct Fn
@@ -45,27 +48,31 @@ struct Fn
 
 struct IfStmt : Stmt
 {
+  int label;
   Exp *cond;
   MultiStmt *t_branch;
   MultiStmt *f_branch;
-  IfStmt(Exp *cond, MultiStmt *t, MultiStmt *f) : cond{cond}, t_branch{t}, f_branch{f} {}
+  IfStmt(Exp *cond, MultiStmt *t, MultiStmt *f) : cond{cond}, t_branch{t}, f_branch{f}, label{label_num++} {}
   std::optional<Data> execute(VarStorage *state);
   void print(VarStorage *state);
 };
 
 struct WhileStmt : Stmt
 {
+  int label;
   Exp *cond;
   MultiStmt *body;
-  WhileStmt(Exp *cond, MultiStmt *body) : cond{cond}, body{body} {}
+  WhileStmt(Exp *cond, MultiStmt *body) : cond{cond}, body{body}, label{label_num++} {}
   std::optional<Data> execute(VarStorage *state);
   void print(VarStorage *state);
 };
 
 struct Pass : Stmt
 {
+  int label;
   std::optional<Data> execute(VarStorage *state);
   void print(VarStorage *state);
+  Pass() : label{label_num++} {}
 };
 
 class AssignStmt : public Stmt
@@ -75,9 +82,11 @@ protected:
   Exp *exp;
 
 public:
-  AssignStmt(string name, Exp *expression);
+  int label;
   void print(VarStorage *state);
   std::optional<Data> execute(VarStorage *state);
+  AssignStmt(std::string name, Exp *expression)
+      : id(name), exp(expression), label{label_num++} {}
 };
 
 class PrintStmt : public Stmt
@@ -86,17 +95,19 @@ protected:
   Exp *exp;
 
 public:
-  PrintStmt(Exp *myexp);
+  int label;
   void print(VarStorage *state);
   std::optional<Data> execute(VarStorage *state);
+  PrintStmt(Exp *myexp) : exp(myexp), label{label_num++} {}
 };
 
 class ReturnStmt : public Stmt
 {
 public:
+  int label;
   Exp *exp;
   Data d;
-  ReturnStmt(Exp *exp) : exp{exp}, d(Data(0)) {}
+  ReturnStmt(Exp *exp) : exp{exp}, d(Data(0)), label{label_num++} {}
   void print(VarStorage *state);
   std::optional<Data> execute(VarStorage *state);
 };
@@ -104,8 +115,9 @@ public:
 class DeclareStmt : public Stmt
 {
 public:
+  int label;
   string id;
-  DeclareStmt(string id) : id{id} {}
+  DeclareStmt(string id) : id{id}, label{label_num++} {}
   void print(VarStorage *state);
   std::optional<Data> execute(VarStorage *state);
 };
@@ -148,11 +160,12 @@ public:
 class ExpList : public Stmt
 {
 public:
+  int label;
   std::vector<Exp *> exps;
   std::vector<Data> evaluated;
   void print(VarStorage *state);
   std::optional<Data> execute(VarStorage *state);
-  ExpList(Exp *exp) : exps(std::vector<Exp *>{exp}), evaluated(std::vector<Data>()) {}
+  ExpList(Exp *exp) : exps(std::vector<Exp *>{exp}), evaluated(std::vector<Data>()), label{label_num++} {}
 };
 
 class FnCallExp : public Exp
@@ -168,10 +181,11 @@ public:
 class ParmList : public Stmt
 {
 public:
+  int label;
   std::vector<std::string> names;
   void print(VarStorage *state);
   std::optional<Data> execute(VarStorage *state);
-  ParmList(std::string s) : names(std::vector<std::string>{s}) {}
+  ParmList(std::string s) : names(std::vector<std::string>{s}), label{label_num++} {}
 };
 
 class IndexExp : public Exp
