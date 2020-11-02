@@ -1,0 +1,16 @@
+int main()
+	
+	int base = 5;
+	int exp = 5;
+	int result;
+	
+	result = exponential(base, exp);
+	print result;
+
+int exponential(int base, int exp)
+	
+	if a != 0
+		return (base * power(base, exp - 1));
+	else
+		return 1;
+end

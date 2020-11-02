@@ -1,0 +1,16 @@
+int main()
+
+	int n = 8;
+	int result;
+	
+	print "The factorial of 8 is: "
+	result = fact(n);
+	print result;
+end
+
+int fact(int n)
+	if n >= 1
+		return n*fact(n - 1);
+	else
+		return 1;
+end
