@@ -81,6 +81,7 @@ protected:
     std::map<std::string, Data> state;
 
 public:
+    VarStorage() : state{} {};
     VarStorage(std::map<std::string, Data> map) : state{map} {}
     void declare(std::string id, Data init);
     void assign(std::string id, Data val);

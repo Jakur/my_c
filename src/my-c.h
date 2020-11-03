@@ -12,6 +12,7 @@ using namespace std;
 static int label_num = 0;
 
 struct DataType;
+class FlowGraph;
 
 class Exp
 {
@@ -25,15 +26,19 @@ struct Stmt
 {
   virtual std::optional<Data> execute(VarStorage *state) = 0;
   virtual void print(VarStorage *state) = 0;
+  virtual void compute_flow(FlowGraph *g);
+  virtual int label() = 0;
 };
 
 struct MultiStmt : Stmt
 {
-  int label;
+  int lab;
   std::vector<Stmt *> stmts;
   std::optional<Data> execute(VarStorage *state);
   void print(VarStorage *state);
-  MultiStmt(Stmt *s) : stmts(std::vector<Stmt *>{s}), label{label_num++} {}
+  MultiStmt(Stmt *s) : stmts(std::vector<Stmt *>{s}), lab{label_num++} {}
+  void compute_flow(FlowGraph *g);
+  int label() { return lab; };
 };
 
 struct Fn
@@ -48,31 +53,34 @@ struct Fn
 
 struct IfStmt : Stmt
 {
-  int label;
+  int lab;
   Exp *cond;
   MultiStmt *t_branch;
   MultiStmt *f_branch;
-  IfStmt(Exp *cond, MultiStmt *t, MultiStmt *f) : cond{cond}, t_branch{t}, f_branch{f}, label{label_num++} {}
+  IfStmt(Exp *cond, MultiStmt *t, MultiStmt *f) : cond{cond}, t_branch{t}, f_branch{f}, lab{label_num++} {}
   std::optional<Data> execute(VarStorage *state);
   void print(VarStorage *state);
+  int label() { return lab; };
 };
 
 struct WhileStmt : Stmt
 {
-  int label;
+  int lab;
   Exp *cond;
   MultiStmt *body;
-  WhileStmt(Exp *cond, MultiStmt *body) : cond{cond}, body{body}, label{label_num++} {}
+  WhileStmt(Exp *cond, MultiStmt *body) : cond{cond}, body{body}, lab{label_num++} {}
   std::optional<Data> execute(VarStorage *state);
   void print(VarStorage *state);
+  int label() { return lab; };
 };
 
 struct Pass : Stmt
 {
-  int label;
+  int lab;
   std::optional<Data> execute(VarStorage *state);
   void print(VarStorage *state);
-  Pass() : label{label_num++} {}
+  Pass() : lab{label_num++} {}
+  int label() { return lab; };
 };
 
 class AssignStmt : public Stmt
@@ -82,11 +90,12 @@ protected:
   Exp *exp;
 
 public:
-  int label;
+  int lab;
   void print(VarStorage *state);
   std::optional<Data> execute(VarStorage *state);
   AssignStmt(std::string name, Exp *expression)
-      : id(name), exp(expression), label{label_num++} {}
+      : id(name), exp(expression), lab{label_num++} {}
+  int label() { return lab; };
 };
 
 class PrintStmt : public Stmt
@@ -95,31 +104,34 @@ protected:
   Exp *exp;
 
 public:
-  int label;
+  int lab;
   void print(VarStorage *state);
   std::optional<Data> execute(VarStorage *state);
-  PrintStmt(Exp *myexp) : exp(myexp), label{label_num++} {}
+  PrintStmt(Exp *myexp) : exp(myexp), lab{label_num++} {}
+  int label() { return lab; };
 };
 
 class ReturnStmt : public Stmt
 {
 public:
-  int label;
+  int lab;
   Exp *exp;
   Data d;
-  ReturnStmt(Exp *exp) : exp{exp}, d(Data(0)), label{label_num++} {}
+  ReturnStmt(Exp *exp) : exp{exp}, d(Data(0)), lab{label_num++} {}
   void print(VarStorage *state);
   std::optional<Data> execute(VarStorage *state);
+  int label() { return lab; };
 };
 
 class DeclareStmt : public Stmt
 {
 public:
-  int label;
+  int lab;
   string id;
-  DeclareStmt(string id) : id{id}, label{label_num++} {}
+  DeclareStmt(string id) : id{id}, lab{label_num++} {}
   void print(VarStorage *state);
   std::optional<Data> execute(VarStorage *state);
+  int label() { return lab; };
 };
 
 class BinaryExp : public Exp
@@ -160,12 +172,13 @@ public:
 class ExpList : public Stmt
 {
 public:
-  int label;
+  int lab;
   std::vector<Exp *> exps;
   std::vector<Data> evaluated;
   void print(VarStorage *state);
   std::optional<Data> execute(VarStorage *state);
-  ExpList(Exp *exp) : exps(std::vector<Exp *>{exp}), evaluated(std::vector<Data>()), label{label_num++} {}
+  ExpList(Exp *exp) : exps(std::vector<Exp *>{exp}), evaluated(std::vector<Data>()), lab{label_num++} {}
+  int label() { return lab; };
 };
 
 class FnCallExp : public Exp
@@ -181,11 +194,12 @@ public:
 class ParmList : public Stmt
 {
 public:
-  int label;
+  int lab;
   std::vector<std::string> names;
   void print(VarStorage *state);
   std::optional<Data> execute(VarStorage *state);
-  ParmList(std::string s) : names(std::vector<std::string>{s}), label{label_num++} {}
+  ParmList(std::string s) : names(std::vector<std::string>{s}), lab{label_num++} {}
+  int label() { return lab; };
 };
 
 class IndexExp : public Exp
@@ -225,6 +239,35 @@ public:
   VarExp(std::string id) : id({id}) {}
   Data evaluate(VarStorage *state);
   void print(VarStorage *state) { cout << this->id; };
+};
+
+class FlowGraph
+{
+public:
+  FlowGraph() : edges{}, nodes{} {}
+  void add_edge(int src, int dest, Stmt *src_stmt, Stmt *dest_stmt);
+  std::map<int, Stmt *> nodes;
+  void print_edges()
+  {
+    for (int i = 0; i < this->edges.size(); i++)
+    {
+      auto v = this->edges[i];
+      cout << "Index: " << i << " [";
+      for (auto x : v)
+      {
+        cout << x << ", ";
+      }
+      cout << "]" << endl;
+    }
+    for (auto n : this->nodes)
+    {
+      cout << n.first << " ";
+    }
+    cout << endl;
+  }
+
+private:
+  std::vector<std::vector<int>> edges;
 };
 
 // the object at the base of our tree

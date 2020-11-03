@@ -8,6 +8,8 @@
 
 using namespace std;
 
+void Stmt::compute_flow(FlowGraph *g) {}
+
 bool Exp::to_bool(VarStorage *state)
 {
   Data d = this->evaluate(state);
@@ -39,6 +41,25 @@ void MultiStmt::print(VarStorage *state)
   for (int i = this->stmts.size() - 1; i >= 0; i--)
   {
     this->stmts[i]->print(state);
+  }
+}
+void MultiStmt::compute_flow(FlowGraph *g)
+{
+  auto dummy = new VarStorage{};
+  if (this->stmts.size() < 1)
+  {
+    return;
+  }
+  auto last = this->stmts[this->stmts.size() - 1];
+  g->add_edge(this->label(), last->label(), this, last);
+  for (int i = this->stmts.size() - 1; i > 0; i--)
+  {
+    auto a = this->stmts[i];
+    auto b = this->stmts[i - 1];
+    a->print(dummy);
+    b->print(dummy);
+    cout << "Edge 1: " << a->label() << " Edge 2: " << b->label();
+    g->add_edge(a->label(), b->label(), a, b);
   }
 }
 
@@ -118,7 +139,7 @@ void Pass::print(VarStorage *state)
 
 void AssignStmt::print(VarStorage *state)
 {
-  cout << id << " = ";
+  cout << "#" << this->label() << ": " << id << " = ";
   exp->print(state);
   cout << endl;
 }
@@ -371,6 +392,17 @@ void DataType::print(VarStorage *state)
     std::cout << "Type with initial value";
     this->init.print();
   }
+}
+
+void FlowGraph::add_edge(int src, int dest, Stmt *src_node, Stmt *dest_node)
+{
+  this->nodes.insert(std::pair<int, Stmt *>{src, src_node});
+  this->nodes.insert(std::pair<int, Stmt *>{dest, dest_node});
+  while (src >= this->edges.size() || dest >= this->edges.size())
+  {
+    this->edges.push_back(std::vector<int>{});
+  }
+  this->edges[src].push_back(dest);
 }
 
 map<string, Fn *> fns;

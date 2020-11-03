@@ -274,6 +274,8 @@ int main(int argc, char **argv)
   
   yyparse();
   cout << "Hmm... " << label_num << endl;
+  auto g = new FlowGraph();
+
   cout << "---------- list of input program------------" << endl << endl;
   map<string, Fn *>::iterator it;
   for (it = fns.begin(); it != fns.end(); it++) {
@@ -281,6 +283,9 @@ int main(int argc, char **argv)
     it->second->print();
   }
   main_fn = fns["main"];
+  main_fn->stmts->compute_flow(g);
+  g->print_edges();
+
   cout << "---------- execution of input program------------" << endl << endl;
   if (main_fn == nullptr) {
     cout << "NULL MAIN" << endl;
