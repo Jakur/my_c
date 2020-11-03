@@ -32,13 +32,12 @@ struct Stmt
 
 struct MultiStmt : Stmt
 {
-  int lab;
   std::vector<Stmt *> stmts;
   std::optional<Data> execute(VarStorage *state);
   void print(VarStorage *state);
-  MultiStmt(Stmt *s) : stmts(std::vector<Stmt *>{s}), lab{label_num++} {}
+  MultiStmt(Stmt *s) : stmts(std::vector<Stmt *>{s}) {}
   void compute_flow(FlowGraph *g);
-  int label() { return lab; };
+  int label() { return this->stmts[stmts.size() - 1]->label(); };
 };
 
 struct Fn
@@ -245,13 +244,15 @@ class FlowGraph
 {
 public:
   FlowGraph() : edges{}, nodes{} {}
-  void add_edge(int src, int dest, Stmt *src_stmt, Stmt *dest_stmt);
   std::map<int, Stmt *> nodes;
+  void add_edge(int src, int dest, Stmt *src_stmt, Stmt *dest_stmt);
   void print_edges()
   {
-    for (int i = 0; i < this->edges.size(); i++)
+    auto dummy = new VarStorage{};
+    for (auto p : edges)
     {
-      auto v = this->edges[i];
+      int i = p.first;
+      auto v = p.second;
       cout << "Index: " << i << " [";
       for (auto x : v)
       {
@@ -264,10 +265,16 @@ public:
       cout << n.first << " ";
     }
     cout << endl;
+    for (auto p : nodes)
+    {
+      cout << "Index: " << p.first << " ";
+      p.second->print(dummy);
+      cout << endl;
+    }
   }
 
 private:
-  std::vector<std::vector<int>> edges;
+  std::map<int, std::vector<int>> edges;
 };
 
 // the object at the base of our tree

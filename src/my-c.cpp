@@ -398,10 +398,8 @@ void FlowGraph::add_edge(int src, int dest, Stmt *src_node, Stmt *dest_node)
 {
   this->nodes.insert(std::pair<int, Stmt *>{src, src_node});
   this->nodes.insert(std::pair<int, Stmt *>{dest, dest_node});
-  while (src >= this->edges.size() || dest >= this->edges.size())
-  {
-    this->edges.push_back(std::vector<int>{});
-  }
+  this->edges.insert(std::pair<int, std::vector<int>>{src, std::vector<int>{}});
+  this->edges.insert(std::pair<int, std::vector<int>>{dest, std::vector<int>{}});
   this->edges[src].push_back(dest);
 }
 
