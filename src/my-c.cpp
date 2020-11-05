@@ -56,9 +56,9 @@ void MultiStmt::compute_flow(FlowGraph *g)
   {
     auto a = this->stmts[i];
     auto b = this->stmts[i - 1];
-    a->print(dummy);
-    b->print(dummy);
-    cout << "Edge 1: " << a->label() << " Edge 2: " << b->label();
+    // a->print(dummy);
+    // b->print(dummy);
+    // cout << "Edge 1: " << a->label() << " Edge 2: " << b->label();
     g->add_edge(a->label(), b->label(), a, b);
   }
 }
@@ -95,6 +95,7 @@ std::optional<Data> IfStmt::execute(VarStorage *state)
 }
 void IfStmt::print(VarStorage *state)
 {
+  print_label(this->label());
   cout << "if ";
   this->cond->print(state);
   cout << " then ";
@@ -121,6 +122,7 @@ std::optional<Data> WhileStmt::execute(VarStorage *state)
 }
 void WhileStmt::print(VarStorage *state)
 {
+  print_label(this->label());
   cout << "while ";
   this->cond->print(state);
   cout << " do ";
@@ -139,7 +141,8 @@ void Pass::print(VarStorage *state)
 
 void AssignStmt::print(VarStorage *state)
 {
-  cout << "#" << this->label() << ": " << id << " = ";
+  print_label(this->label());
+  cout << id << " = ";
   exp->print(state);
   cout << endl;
 }
@@ -153,6 +156,7 @@ std::optional<Data> AssignStmt::execute(VarStorage *state)
 
 void PrintStmt::print(VarStorage *state)
 {
+  print_label(this->label());
   cout << "print ";
   exp->print(state);
   cout << endl;
@@ -401,6 +405,28 @@ void FlowGraph::add_edge(int src, int dest, Stmt *src_node, Stmt *dest_node)
   this->edges.insert(std::pair<int, std::vector<int>>{src, std::vector<int>{}});
   this->edges.insert(std::pair<int, std::vector<int>>{dest, std::vector<int>{}});
   this->edges[src].push_back(dest);
+}
+
+void FlowGraph::print_edges()
+{
+  auto dummy = new VarStorage{};
+  for (auto p : edges)
+  {
+    int i = p.first;
+    auto v = p.second;
+    cout << "#" << i << " [";
+    for (auto x : v)
+    {
+      cout << x << ", ";
+    }
+    cout << "]" << endl;
+  }
+  cout << endl;
+}
+
+void print_label(int label)
+{
+  std::cout << "#" << label << ": ";
 }
 
 map<string, Fn *> fns;

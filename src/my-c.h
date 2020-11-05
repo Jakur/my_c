@@ -246,36 +246,13 @@ public:
   FlowGraph() : edges{}, nodes{} {}
   std::map<int, Stmt *> nodes;
   void add_edge(int src, int dest, Stmt *src_stmt, Stmt *dest_stmt);
-  void print_edges()
-  {
-    auto dummy = new VarStorage{};
-    for (auto p : edges)
-    {
-      int i = p.first;
-      auto v = p.second;
-      cout << "Index: " << i << " [";
-      for (auto x : v)
-      {
-        cout << x << ", ";
-      }
-      cout << "]" << endl;
-    }
-    for (auto n : this->nodes)
-    {
-      cout << n.first << " ";
-    }
-    cout << endl;
-    for (auto p : nodes)
-    {
-      cout << "Index: " << p.first << " ";
-      p.second->print(dummy);
-      cout << endl;
-    }
-  }
+  void print_edges();
 
 private:
   std::map<int, std::vector<int>> edges;
 };
+
+void print_label(int label);
 
 // the object at the base of our tree
 extern map<string, Fn *> fns;
