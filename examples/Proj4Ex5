@@ -1,16 +1,35 @@
 int main()
 
-	int n = 8;
-	int result;
+	int a = 332;
+	int b = 367;
+	int c = 313;
+	int resultLarge;
+	int resultAverage;
 	
-	print "The factorial of 8 is: "
-	result = fact(n);
-	print result;
+	print "The three numbers given are: ";
+	print a;
+	print b;
+	print c;
+	
+	print "The largest number is: ";
+	resultLarge = largest(a, b, c);
+	print resultLarge;
+	
+	print "The average of the three numbers is: ";
+	resultAverage = average(a, b, c);
+	print resultAverage;
+	
 end
 
-int fact(int n)
-	if n >= 1
-		return n*fact(n - 1);
-	else
-		return 1;
+int largest(int a, int b, int c)
+	if a > b && a > c
+		return a;
+	if b > a && b > c
+		print b;
+	if c > a && c > b
+		print c;
+end
+
+int average(int a, int b, int c)
+	return ((a + b + c) / 3);
 end

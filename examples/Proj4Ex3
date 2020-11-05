@@ -2,15 +2,29 @@ int main()
 	
 	int base = 5;
 	int exp = 5;
-	int result;
+	int n = 5;
+	int resultExp;
+	int resultFact;
 	
-	result = exponential(base, exp);
-	print result;
+	print "The value of 5 raised to the 5th power is: ";
+	resultExp = exponential(base, exp);
+	print resultExp;
+	
+	print "The value of 5 factorial is: ";
+	resultFact = fact(n);
+	print resultFact;
 
 int exponential(int base, int exp)
 	
 	if a != 0
 		return (base * power(base, exp - 1));
+	else
+		return 1;
+end
+
+int fact(int n)
+	if n >= 1
+		return n*fact(n - 1);
 	else
 		return 1;
 end
