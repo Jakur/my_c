@@ -13,8 +13,8 @@ A small toy language for exploring compilers
 3) To evaluate programs, pipe output from a file into my-c, e.g. cat ../examples/prog5 | ./my-c
 
 +Example Programs:
-1) prog1 is a blanket test of the my_c language.
-2) prog2 finds the range of an array, i.e. the difference between its maximum value and its minimum value.
-3) prog3 is a Fizzbuzz.
-4) prog4 calculates the sum of numbers 1 through 50 using a while loop and compares it to a known formula. 
-5) prog5 calculates the factorial of 10.
+1) Proj4Ex1 is a blanket test of the my_c language.
+2) Proj4Ex2 finds the range of an array, i.e. the difference between its maximum value and its minimum value.
+3) Proj4Ex3 calculates the factorial of 5 and the value of 5^5.
+4) Proj4Ex4 Calculate the sum of 1 to 50 using a loop and calculates the sum using a formula and compares the two values.
+5) Proj4Ex5 prints the largest number and the average between 332, 367, 313.
