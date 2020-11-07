@@ -251,14 +251,12 @@ class FlowGraph
 public:
   FlowGraph() : edges{}, rev_edges{}, nodes{} {}
   std::map<int, Stmt *> nodes;
+  std::map<int, std::set<int>> edges;
+  std::map<int, std::set<int>> rev_edges;
   void add_node(int label_id, Stmt *stmt);
   void add_edge(int src, int dest);
   void print_edges();
   void print_rev_edges();
-
-private:
-  std::map<int, std::set<int>> edges;
-  std::map<int, std::set<int>> rev_edges;
 };
 
 void print_label(int label);

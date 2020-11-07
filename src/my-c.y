@@ -24,6 +24,7 @@ using namespace std;
 // function prototypes, we need the yylex return prototype so C++ won't complain
 int yylex();
 void yyerror(const char* s);
+void analyzer();
 BinaryOperator get_op(int x);
 
 %}
@@ -268,6 +269,10 @@ return_stmt:
 ;
 
 %%
+// struct FlowEquation {
+
+// }
+
 int main(int argc, char **argv)
 { 
   if (argc>1) yyin=fopen(argv[1],"r");
@@ -284,9 +289,9 @@ int main(int argc, char **argv)
     it->second->stmts->compute_flow(g, -1, -1);
   }
   main_fn = fns["main"];
-  g->print_edges();
-  g->print_rev_edges();
-  // rev.print_edges();
+  // g->print_edges();
+  // g->print_rev_edges();
+  analyzer();
 
   cout << "---------- execution of input program------------" << endl << endl;
   if (main_fn == nullptr) {
@@ -298,13 +303,53 @@ int main(int argc, char **argv)
 
 void analyzer() {
   for (auto it = fns.begin(); it != fns.end(); it++) {
+    auto g = new FlowGraph();
+    it->second->stmts->compute_flow(g, -1, -1);
     std::cout << "Fn " << it->first << " Reaching Definitions: " << endl;
     auto stmts = it->second->stmts->stmts;
     int start = stmts[stmts.size() - 1]->label();
-    cout << "TODO Start with Label " << start;
-
-    // it->second->print();
-    // it->second->stmts->compute_flow(g, -1, -1);
+    auto parms = it->second->parameters;
+    if (parms.size() == 0) {
+      cout << "RD_Entry(" << start << "): { }" << endl;
+    } else {
+      cout << "RD_Entry(" << start << "): {";
+      for (auto p : parms) {
+        cout << "( " << p << ", ?)";
+      }
+      cout << "}" << endl;
+    }
+    // Output Entry Equations
+    for (auto pair : g->rev_edges) {
+      int key = pair.first;
+      if (key == start) {
+        continue; // Handled above
+      }
+      auto set = pair.second;
+      cout << "RD_Entry(" << key << "): ";
+      int size = set.size();
+      if (size == 0) {
+        cout << "{ }" << endl;
+      } else {
+        int counter = 0;
+        cout << "{";
+        for (auto element : set) {
+          counter += 1;
+          cout << "RD_Exit(" << element << ")";
+          if (counter < size) {
+            cout << " U ";
+          }
+        }
+        cout << "}" << endl;
+      }
+    }
+    // Output Exit Equations
+    for (auto pair : g->nodes) {
+      int label = pair.first;
+      auto node = pair.second;
+      auto kill_var = node->kill_set();
+      auto gen_var = node->gen_set();
+      cout << "Label: " << label << endl;
+    }
   }
 }
 

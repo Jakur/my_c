@@ -147,6 +147,8 @@ void IfStmt::print(VarStorage *state)
 
 void IfStmt::compute_flow(FlowGraph *g, int prev, int next)
 {
+  g->add_node(this->label(), this);
+  g->add_edge(prev, this->label()); // Todo see if this works
   this->t_branch->compute_flow(g, this->label(), next);
   if (this->f_branch != nullptr)
   {
@@ -182,6 +184,7 @@ void WhileStmt::print(VarStorage *state)
 
 void WhileStmt::compute_flow(FlowGraph *g, int prev, int next)
 {
+  g->add_node(this->label(), this);
   g->add_edge(prev, next);
   if (this->body != nullptr)
   {
