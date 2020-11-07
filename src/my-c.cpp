@@ -142,6 +142,10 @@ void IfStmt::compute_flow(FlowGraph *g, int prev, int next)
   {
     this->f_branch->compute_flow(g, this->label(), next);
   }
+  else
+  {
+    g->add_edge(this->label(), next);
+  }
 }
 
 std::optional<Data> WhileStmt::execute(VarStorage *state)
@@ -173,6 +177,7 @@ void WhileStmt::compute_flow(FlowGraph *g, int prev, int next)
   {
     this->body->compute_flow(g, this->label(), next);
   }
+  this->body->stmts[0]->compute_flow(g, -1, this->label());
 }
 
 std::optional<Data> Pass::execute(VarStorage *state)
@@ -221,6 +226,7 @@ std::optional<Data> ReturnStmt::execute(VarStorage *state)
 
 void ReturnStmt::print(VarStorage *state)
 {
+  print_label(this->label());
   cout << "Return ";
   exp->print(state);
   cout << endl;
@@ -450,6 +456,10 @@ void FlowGraph::add_node(int label_id, Stmt *stmt)
 
 void FlowGraph::add_edge(int src, int dest)
 {
+  if (src == -1 || dest == -1)
+  {
+    return;
+  }
   this->edges.insert(std::pair<int, std::set<int>>{src, std::set<int>{}});
   this->edges.insert(std::pair<int, std::set<int>>{dest, std::set<int>{}});
   this->edges[src].insert(dest);

@@ -12,6 +12,7 @@ int main()
 end
 
 int sumZeroN(int n)
-	return n * (n + 1) / 2;
+	int x = n * (n + 1) / 2;
+	return x;
 end
   

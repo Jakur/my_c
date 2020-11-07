@@ -281,9 +281,9 @@ int main(int argc, char **argv)
   for (it = fns.begin(); it != fns.end(); it++) {
     std::cout << "Fn " << it->first << ": " << endl;
     it->second->print();
+    it->second->stmts->compute_flow(g, -1, -1);
   }
   main_fn = fns["main"];
-  main_fn->stmts->compute_flow(g);
   g->print_edges();
 
   cout << "---------- execution of input program------------" << endl << endl;
