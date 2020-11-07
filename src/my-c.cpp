@@ -22,6 +22,16 @@ void Stmt::compute_flow(FlowGraph *g, int prev, int next)
   }
 }
 
+std::optional<std::string> Stmt::gen_set()
+{
+  return {};
+}
+
+std::optional<std::string> Stmt::kill_set()
+{
+  return {};
+}
+
 bool Exp::to_bool(VarStorage *state)
 {
   Data d = this->evaluate(state);
@@ -202,6 +212,15 @@ std::optional<Data> AssignStmt::execute(VarStorage *state)
   Data result = exp->evaluate(state);
   state->assign(id, result);
   return {};
+}
+
+std::optional<std::string> AssignStmt::gen_set()
+{
+  return this->id;
+}
+std::optional<std::string> AssignStmt::kill_set()
+{
+  return this->id;
 }
 
 void PrintStmt::print(VarStorage *state)
@@ -463,12 +482,30 @@ void FlowGraph::add_edge(int src, int dest)
   this->edges.insert(std::pair<int, std::set<int>>{src, std::set<int>{}});
   this->edges.insert(std::pair<int, std::set<int>>{dest, std::set<int>{}});
   this->edges[src].insert(dest);
+  this->rev_edges.insert(std::pair<int, std::set<int>>{src, std::set<int>{}});
+  this->rev_edges.insert(std::pair<int, std::set<int>>{dest, std::set<int>{}});
+  this->rev_edges[dest].insert(src);
 }
 
 void FlowGraph::print_edges()
 {
-  auto dummy = new VarStorage{};
   for (auto p : edges)
+  {
+    int i = p.first;
+    auto v = p.second;
+    cout << "#" << i << " [";
+    for (auto x : v)
+    {
+      cout << x << ", ";
+    }
+    cout << "]" << endl;
+  }
+  cout << endl;
+}
+
+void FlowGraph::print_rev_edges()
+{
+  for (auto p : rev_edges)
   {
     int i = p.first;
     auto v = p.second;

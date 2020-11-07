@@ -2,6 +2,7 @@
 #include "stdio.h"
 #include "iostream"
 #include <map>
+#include <set>
 #include <vector>
 
 enum class BinaryOperator
@@ -86,4 +87,13 @@ public:
     void declare(std::string id, Data init);
     void assign(std::string id, Data val);
     Data get(std::string *name);
+};
+
+struct ReachSet
+{
+    ReachSet() : data{} {};
+    std::map<std::string, std::set<int>> data;
+    void kill_assignments(std::string s);
+    void add_assignment(std::string s, int label);
+    ReachSet rset_union(ReachSet *other);
 };

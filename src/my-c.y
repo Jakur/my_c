@@ -285,12 +285,26 @@ int main(int argc, char **argv)
   }
   main_fn = fns["main"];
   g->print_edges();
+  g->print_rev_edges();
+  // rev.print_edges();
 
   cout << "---------- execution of input program------------" << endl << endl;
   if (main_fn == nullptr) {
     cout << "NULL MAIN" << endl;
   } else {
     main_fn->fn_call(VarStorage(map<string, Data>()));
+  }
+}
+
+void analyzer() {
+  for (auto it = fns.begin(); it != fns.end(); it++) {
+    std::cout << "Fn " << it->first << " Reaching Definitions: " << endl;
+    auto stmts = it->second->stmts->stmts;
+    int start = stmts[stmts.size() - 1]->label();
+    cout << "TODO Start with Label " << start;
+
+    // it->second->print();
+    // it->second->stmts->compute_flow(g, -1, -1);
   }
 }
 

@@ -6,7 +6,6 @@
 #include <optional>
 #include "data.h"
 #include <vector>
-#include <set>
 
 using namespace std;
 
@@ -29,6 +28,8 @@ struct Stmt
   virtual void print(VarStorage *state) = 0;
   virtual void compute_flow(FlowGraph *g, int prev, int next);
   virtual int label() = 0;
+  virtual std::optional<std::string> gen_set();
+  virtual std::optional<std::string> kill_set();
 };
 
 struct MultiStmt : Stmt
@@ -98,6 +99,8 @@ public:
   AssignStmt(std::string name, Exp *expression)
       : id(name), exp(expression), lab{label_num++} {}
   int label() { return lab; };
+  std::optional<std::string> gen_set() override;
+  std::optional<std::string> kill_set() override;
 };
 
 class PrintStmt : public Stmt
@@ -246,14 +249,16 @@ public:
 class FlowGraph
 {
 public:
-  FlowGraph() : edges{}, nodes{} {}
+  FlowGraph() : edges{}, rev_edges{}, nodes{} {}
   std::map<int, Stmt *> nodes;
   void add_node(int label_id, Stmt *stmt);
   void add_edge(int src, int dest);
   void print_edges();
+  void print_rev_edges();
 
 private:
   std::map<int, std::set<int>> edges;
+  std::map<int, std::set<int>> rev_edges;
 };
 
 void print_label(int label);

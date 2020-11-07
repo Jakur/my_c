@@ -253,3 +253,34 @@ Data VarStorage::get(std::string *name)
     auto d = this->state.at(*name);
     return Data(d);
 }
+
+void ReachSet::kill_assignments(std::string s)
+{
+    auto it = this->data.find(s);
+    if (it != this->data.end())
+    {
+        it->second.clear();
+    }
+}
+
+void ReachSet::add_assignment(std::string s, int label)
+{
+    auto it = this->data.find(s);
+    if (it != this->data.end())
+    {
+        it->second.insert(label);
+    }
+    else
+    {
+        this->data.insert(std::pair<std::string, std::set<int>>{s, std::set<int>{label}});
+    }
+}
+
+ReachSet ReachSet::rset_union(ReachSet *other)
+{
+    auto out = ReachSet();
+    auto out_set = &out.data;
+    out_set->insert(this->data.begin(), this->data.end());
+    out_set->insert(other->data.begin(), other->data.end());
+    return out;
+}
