@@ -6,6 +6,7 @@
 #include <optional>
 #include "data.h"
 #include <vector>
+#include <set>
 
 using namespace std;
 
@@ -26,7 +27,7 @@ struct Stmt
 {
   virtual std::optional<Data> execute(VarStorage *state) = 0;
   virtual void print(VarStorage *state) = 0;
-  virtual void compute_flow(FlowGraph *g);
+  virtual void compute_flow(FlowGraph *g, int prev, int next);
   virtual int label() = 0;
 };
 
@@ -36,7 +37,7 @@ struct MultiStmt : Stmt
   std::optional<Data> execute(VarStorage *state);
   void print(VarStorage *state);
   MultiStmt(Stmt *s) : stmts(std::vector<Stmt *>{s}) {}
-  void compute_flow(FlowGraph *g);
+  void compute_flow(FlowGraph *g, int prev, int next) override;
   int label() { return this->stmts[stmts.size() - 1]->label(); };
 };
 
@@ -60,6 +61,7 @@ struct IfStmt : Stmt
   std::optional<Data> execute(VarStorage *state);
   void print(VarStorage *state);
   int label() { return lab; };
+  void compute_flow(FlowGraph *g, int prev, int next) override;
 };
 
 struct WhileStmt : Stmt
@@ -70,6 +72,7 @@ struct WhileStmt : Stmt
   WhileStmt(Exp *cond, MultiStmt *body) : cond{cond}, body{body}, lab{label_num++} {}
   std::optional<Data> execute(VarStorage *state);
   void print(VarStorage *state);
+  void compute_flow(FlowGraph *g, int prev, int next) override;
   int label() { return lab; };
 };
 
@@ -245,11 +248,12 @@ class FlowGraph
 public:
   FlowGraph() : edges{}, nodes{} {}
   std::map<int, Stmt *> nodes;
-  void add_edge(int src, int dest, Stmt *src_stmt, Stmt *dest_stmt);
+  void add_node(int label_id, Stmt *stmt);
+  void add_edge(int src, int dest);
   void print_edges();
 
 private:
-  std::map<int, std::vector<int>> edges;
+  std::map<int, std::set<int>> edges;
 };
 
 void print_label(int label);

@@ -8,7 +8,19 @@
 
 using namespace std;
 
-void Stmt::compute_flow(FlowGraph *g) {}
+void Stmt::compute_flow(FlowGraph *g, int prev, int next)
+{
+  auto lab = this->label();
+  g->add_node(lab, this);
+  if (prev != -1)
+  {
+    g->add_edge(prev, lab);
+  }
+  if (next != -1)
+  {
+    g->add_edge(lab, next);
+  }
+}
 
 bool Exp::to_bool(VarStorage *state)
 {
@@ -43,23 +55,38 @@ void MultiStmt::print(VarStorage *state)
     this->stmts[i]->print(state);
   }
 }
-void MultiStmt::compute_flow(FlowGraph *g)
+void MultiStmt::compute_flow(FlowGraph *g, int prev, int next)
 {
-  auto dummy = new VarStorage{};
-  if (this->stmts.size() < 1)
+  // auto dummy = new VarStorage{};
+  int size = this->stmts.size();
+  if (size == 0)
   {
-    return;
+    g->add_edge(prev, next);
   }
-  auto last = this->stmts[this->stmts.size() - 1];
-  g->add_edge(this->label(), last->label(), this, last);
-  for (int i = this->stmts.size() - 1; i > 0; i--)
+  else if (size == 1)
   {
-    auto a = this->stmts[i];
-    auto b = this->stmts[i - 1];
-    // a->print(dummy);
-    // b->print(dummy);
-    // cout << "Edge 1: " << a->label() << " Edge 2: " << b->label();
-    g->add_edge(a->label(), b->label(), a, b);
+    this->stmts[0]->compute_flow(g, prev, next);
+  }
+  else if (size == 2)
+  {
+    auto a = this->stmts[1];
+    auto b = this->stmts[0];
+    a->compute_flow(g, prev, b->label());
+    b->compute_flow(g, -1, next);
+  }
+  else
+  {
+    auto first = this->stmts[size - 1];
+    first->compute_flow(g, prev, this->stmts[size - 2]->label());
+    for (int i = 1; i < this->stmts.size() - 1; ++i)
+    {
+      auto a = this->stmts[i + 1];
+      auto b = this->stmts[i];
+      auto c = this->stmts[i - 1];
+      b->compute_flow(g, -1, c->label());
+    }
+    auto last = this->stmts[0];
+    last->compute_flow(g, this->stmts[1]->label(), next);
   }
 }
 
@@ -108,6 +135,15 @@ void IfStmt::print(VarStorage *state)
   cout << "end" << endl;
 }
 
+void IfStmt::compute_flow(FlowGraph *g, int prev, int next)
+{
+  this->t_branch->compute_flow(g, this->label(), next);
+  if (this->f_branch != nullptr)
+  {
+    this->f_branch->compute_flow(g, this->label(), next);
+  }
+}
+
 std::optional<Data> WhileStmt::execute(VarStorage *state)
 {
   while (this->cond->to_bool(state))
@@ -128,6 +164,15 @@ void WhileStmt::print(VarStorage *state)
   cout << " do ";
   this->body->print(state);
   cout << "end " << endl;
+}
+
+void WhileStmt::compute_flow(FlowGraph *g, int prev, int next)
+{
+  g->add_edge(prev, next);
+  if (this->body != nullptr)
+  {
+    this->body->compute_flow(g, this->label(), next);
+  }
 }
 
 std::optional<Data> Pass::execute(VarStorage *state)
@@ -398,13 +443,16 @@ void DataType::print(VarStorage *state)
   }
 }
 
-void FlowGraph::add_edge(int src, int dest, Stmt *src_node, Stmt *dest_node)
+void FlowGraph::add_node(int label_id, Stmt *stmt)
 {
-  this->nodes.insert(std::pair<int, Stmt *>{src, src_node});
-  this->nodes.insert(std::pair<int, Stmt *>{dest, dest_node});
-  this->edges.insert(std::pair<int, std::vector<int>>{src, std::vector<int>{}});
-  this->edges.insert(std::pair<int, std::vector<int>>{dest, std::vector<int>{}});
-  this->edges[src].push_back(dest);
+  this->nodes.insert(std::pair<int, Stmt *>{label_id, stmt});
+}
+
+void FlowGraph::add_edge(int src, int dest)
+{
+  this->edges.insert(std::pair<int, std::set<int>>{src, std::set<int>{}});
+  this->edges.insert(std::pair<int, std::set<int>>{dest, std::set<int>{}});
+  this->edges[src].insert(dest);
 }
 
 void FlowGraph::print_edges()
