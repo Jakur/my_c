@@ -331,7 +331,6 @@ void analyzer() {
         cout << "{ }" << endl;
       } else {
         int counter = 0;
-        cout << "{";
         for (auto element : set) {
           counter += 1;
           cout << "RD_Exit(" << element << ")";
@@ -339,7 +338,7 @@ void analyzer() {
             cout << " U ";
           }
         }
-        cout << "}" << endl;
+        cout << endl;
       }
     }
     cout << endl;
