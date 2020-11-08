@@ -1,5 +1,18 @@
 int main()
-        print "Begin Program";
+	print "Begin Program";
+	int ret = 0;
+	ret = ret + varTest("Variable And Operation Test");
+	ret = ret + boolTest("Boolean Operation Test");
+	ret = ret + loopTest("While Loop Test");
+	
+	if ret == 0 then print "Tests Successful"; else print "Something went wrong"; end
+	print "End Program";
+	
+end	
+			
+int varTest(string s)
+	print s;
+	
 	int a = 42;
 	float b = 1.01 + 1.01;
 	char c = 'c';
@@ -20,6 +33,11 @@ int main()
 	print x;
 	print y;
 	print z;
+	return 0;
+end
+	
+int boolTest(string s)	
+	print s;
 	
 	if true && false
 		then print "NOK";
@@ -60,6 +78,11 @@ int main()
 		then print "OK";
 		else print "NOK";
 	end
+	return 0;
+end
+	
+int loopTest(string s)
+	print s;
 	
 	int i = 0;
 	while i != 5
@@ -67,5 +90,5 @@ int main()
 	    i = i + 1;
 	  end
 	if i == 5 then print "OK"; else print "NOK"; end
-	
+	return 0;
 end

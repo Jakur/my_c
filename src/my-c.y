@@ -278,10 +278,9 @@ int main(int argc, char **argv)
   if (argc>1) yyin=fopen(argv[1],"r");
   
   yyparse();
-  cout << "Hmm... " << label_num << endl;
   auto g = new FlowGraph();
 
-  cout << "---------- list of input program------------" << endl << endl;
+  cout << "---------- List of Input Program------------" << endl << endl;
   map<string, Fn *>::iterator it;
   for (it = fns.begin(); it != fns.end(); it++) {
     std::cout << "Fn " << it->first << ": " << endl;
@@ -289,11 +288,12 @@ int main(int argc, char **argv)
     it->second->stmts->compute_flow(g, -1, -1);
   }
   main_fn = fns["main"];
-  // g->print_edges();
-  // g->print_rev_edges();
+  cout << "---------- Flow Graph Adjacency Lists------------" << endl << endl;
+  g->print_edges();
+  cout << "---------- Reaching Defintions------------" << endl << endl;
   analyzer();
 
-  cout << "---------- execution of input program------------" << endl << endl;
+  cout << "---------- Execution of Input Program------------" << endl << endl;
   if (main_fn == nullptr) {
     cout << "NULL MAIN" << endl;
   } else {
@@ -305,7 +305,7 @@ void analyzer() {
   for (auto it = fns.begin(); it != fns.end(); it++) {
     auto g = new FlowGraph();
     it->second->stmts->compute_flow(g, -1, -1);
-    std::cout << "Fn " << it->first << " Reaching Definitions: " << endl;
+    std::cout << "Fn " << it->first << " Reaching Definitions: " << endl << endl;
     auto stmts = it->second->stmts->stmts;
     int start = stmts[stmts.size() - 1]->label();
     auto parms = it->second->parameters;
@@ -325,7 +325,7 @@ void analyzer() {
         continue; // Handled above
       }
       auto set = pair.second;
-      cout << "RD_Entry(" << key << "): ";
+      cout << "RD_Entry(" << key << ") = ";
       int size = set.size();
       if (size == 0) {
         cout << "{ }" << endl;
@@ -342,14 +342,23 @@ void analyzer() {
         cout << "}" << endl;
       }
     }
+    cout << endl;
     // Output Exit Equations
     for (auto pair : g->nodes) {
       int label = pair.first;
       auto node = pair.second;
       auto kill_var = node->kill_set();
       auto gen_var = node->gen_set();
-      cout << "Label: " << label << endl;
+      cout << "RD_Exit(" << label << ") = ";
+      if (kill_var.has_value() && gen_var.has_value()) {
+        cout << "(RD_Entry(" << label << ") \\ {(" << kill_var.value() << ", ANY)}"
+          << ") U " << "(" << gen_var.value() << ", " << label << ")" << endl;
+
+      } else {
+        cout << "RD_Entry(" << label << ")" << endl;
+      }
     }
+    cout << endl;
   }
 }
 

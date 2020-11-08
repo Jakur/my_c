@@ -1,15 +1,28 @@
 int main()
-  int i;
-  int n;
-  i = 1;
-  n = 10;
+  int i = 1;
+  int n = 10;
+  float f = 10.0;
   int fact = 1;
   
   while (i <= n) do
     fact = fact * i;
     i = i + 1;
   end
-
+  print "10 Factorial is";
   print fact;
+  float magic = 2.5066;
+  float sqrtn = 3.1623;
+  float term = f / 2.71828;
+  float res = pow(term, n);
+  print "Stirling Approximation of Factorial";
+  print res * magic * sqrtn;
+end
 
+int pow(float n, int exponent)
+	float res = 1.0;
+	while exponent > 0 do
+		res = res * n;
+		exponent = exponent - 1;
+	end
+	return res;
 end
