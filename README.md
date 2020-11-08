@@ -17,4 +17,4 @@ A small toy language for exploring compilers
 2) prog2 finds the range of an array, i.e. the difference between its maximum value and its minimum value.
 3) prog3 is a Fizzbuzz.
 4) prog4 calculates the sum of numbers 1 through 50 using a while loop and compares it to a known formula. 
-5) prog5 calculates the factorial of 10.
+5) prog5 calculates the factorial of 10 and compares it to Stirling's Approximation.
