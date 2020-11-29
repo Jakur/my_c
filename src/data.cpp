@@ -254,6 +254,59 @@ Data VarStorage::get(std::string *name)
     return Data(d);
 }
 
+bool ReachSet::gen_kill(std::string s, int label)
+{
+    auto it = this->data.find(s);
+    if (it != this->data.end())
+    {
+        // If the rd of this variable is already just the given label
+        if (it->second.size() == 1 && it->second.find(label) != it->second.end())
+        {
+            return false;
+        }
+        else
+        {
+            it->second.clear();
+            it->second.insert(label);
+            return true;
+        }
+    }
+    else
+    {
+        this->data.insert(std::pair<std::string, std::set<int>>{s, std::set<int>{label}});
+        return true;
+    }
+}
+
+bool ReachSet::add_elements(ReachSet *other)
+{
+    bool modified = false;
+    for (auto e : other->data)
+    {
+        std::string variable = e.first;
+        auto set = e.second;
+        if (set.size() == 0)
+        {
+            continue;
+        }
+        auto find = this->data.find(variable);
+        if (find == this->data.end())
+        {
+            this->data.insert(std::pair<std::string, std::set<int>>{variable, set});
+            modified = true;
+        }
+        else
+        {
+            for (int label : set)
+            {
+                auto res = find->second.insert(label); // Returns true if a new element was inserted
+                modified |= res.second;
+            }
+        }
+    }
+    return modified;
+}
+
 void ReachSet::kill_assignments(std::string s)
 {
     auto it = this->data.find(s);

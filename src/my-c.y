@@ -269,9 +269,15 @@ return_stmt:
 ;
 
 %%
-// struct FlowEquation {
 
-// }
+struct EntryEquation {
+  std::vector<int> exit_union;
+};
+
+struct ExitEquation {
+  int eq_label;
+  std::optional<std::string> gen_kills;
+};
 
 int main(int argc, char **argv)
 { 
@@ -305,6 +311,8 @@ void analyzer() {
   for (auto it = fns.begin(); it != fns.end(); it++) {
     auto g = new FlowGraph();
     it->second->stmts->compute_flow(g, -1, -1);
+    auto rds = map<int, ReachSet>();
+    // auto worklist = List()
     std::cout << "Fn " << it->first << " Reaching Definitions: " << endl << endl;
     auto stmts = it->second->stmts->stmts;
     int start = stmts[stmts.size() - 1]->label();
