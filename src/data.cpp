@@ -337,3 +337,42 @@ ReachSet ReachSet::rset_union(ReachSet *other)
     out_set->insert(other->data.begin(), other->data.end());
     return out;
 }
+
+ReachingDefinition::ReachingDefinition() : label{-1}, entry{}, gen_kills{}, in_sol{ReachSet()}, out_sol(ReachSet()){};
+
+ReachingDefinition::ReachingDefinition(int label, std::set<int> entry, std::string gk)
+    : label{label}, entry{entry}, gen_kills{gk}, in_sol{ReachSet()}, out_sol(ReachSet())
+{
+    this->out_sol.gen_kill(gk, label);
+};
+
+ReachingDefinition::ReachingDefinition(int label, std::set<int> entry)
+    : label{label}, entry{entry}, gen_kills{}, in_sol{ReachSet()}, out_sol(ReachSet()){};
+
+bool ReachingDefinition::update(std::map<int, ReachingDefinition> &vec)
+{
+    bool in_modified = false;
+    for (int e : this->entry)
+    {
+        ReachingDefinition e_rd = vec[e];
+        in_modified |= this->in_sol.add_elements(&e_rd.out_sol);
+    }
+    if (in_modified)
+    {
+        if (this->gen_kills.has_value()) // If assignment node
+        {
+            bool out_modified = this->out_sol.gen_kill(gen_kills.value(), this->label);
+            return out_modified;
+        }
+        else
+        {
+            // Output is the same as input, so we know it is modified
+            this->out_sol = ReachSet(this->in_sol);
+            return true;
+        }
+    }
+    else
+    {
+        return false;
+    }
+}

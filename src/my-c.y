@@ -269,16 +269,6 @@ return_stmt:
 ;
 
 %%
-
-struct EntryEquation {
-  std::vector<int> exit_union;
-};
-
-struct ExitEquation {
-  int eq_label;
-  std::optional<std::string> gen_kills;
-};
-
 int main(int argc, char **argv)
 { 
   if (argc>1) yyin=fopen(argv[1],"r");
@@ -311,8 +301,7 @@ void analyzer() {
   for (auto it = fns.begin(); it != fns.end(); it++) {
     auto g = new FlowGraph();
     it->second->stmts->compute_flow(g, -1, -1);
-    auto rds = map<int, ReachSet>();
-    // auto worklist = List()
+    auto rds = map<int, ReachingDefinition>();
     std::cout << "Fn " << it->first << " Reaching Definitions: " << endl << endl;
     auto stmts = it->second->stmts->stmts;
     int start = stmts[stmts.size() - 1]->label();
@@ -356,16 +345,34 @@ void analyzer() {
       auto node = pair.second;
       auto kill_var = node->kill_set();
       auto gen_var = node->gen_set();
+      std::set<int> entries = g->rev_edges[label];
       cout << "RD_Exit(" << label << ") = ";
       if (kill_var.has_value() && gen_var.has_value()) {
         cout << "(RD_Entry(" << label << ") \\ {(" << kill_var.value() << ", ANY)}"
           << ") U " << "(" << gen_var.value() << ", " << label << ")" << endl;
+        auto rd = ReachingDefinition(label, std::set<int>(entries), gen_var.value());
+        rds.insert({label, rd});
 
       } else {
         cout << "RD_Entry(" << label << ")" << endl;
+        auto rd = ReachingDefinition(label, std::set<int>(entries));
+        rds.insert({label, rd});
       }
+    
     }
     cout << endl;
+  }
+}
+
+void worklist_algorithm(FlowGraph *g, map<int, ReachingDefinition> &solutions) {
+  auto worklist = list<int>();
+  // Initialize the worklist with all labels in the flow
+  for (auto pair : g->nodes) {
+    int node_label = pair.first;
+    worklist.push_back(node_label);
+  }
+  while (worklist.size() > 0) {
+    break;
   }
 }
 

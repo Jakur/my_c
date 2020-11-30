@@ -99,3 +99,16 @@ struct ReachSet
     void add_assignment(std::string s, int label);
     ReachSet rset_union(ReachSet *other);
 };
+
+struct ReachingDefinition
+{
+    int label;
+    std::set<int> entry;
+    std::optional<std::string> gen_kills;
+    ReachSet in_sol;
+    ReachSet out_sol;
+    ReachingDefinition();
+    ReachingDefinition(int label, std::set<int> entry, std::string gk);
+    ReachingDefinition(int label, std::set<int> entry);
+    bool update(std::map<int, ReachingDefinition> &vec);
+};
