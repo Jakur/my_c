@@ -273,6 +273,7 @@ bool ReachSet::gen_kill(std::string s, int label)
     }
     else
     {
+        // std::cout << "Else condition" << std::endl;
         this->data.insert(std::pair<std::string, std::set<int>>{s, std::set<int>{label}});
         return true;
     }
@@ -329,6 +330,23 @@ void ReachSet::add_assignment(std::string s, int label)
     }
 }
 
+void ReachSet::print()
+{
+    std::cout << "{";
+
+    for (auto p : this->data)
+    {
+        std::string var = p.first;
+        auto label_set = p.second;
+        for (int label : label_set)
+        {
+            std::cout << "(" << var << ", " << label << "), ";
+        }
+    }
+
+    std::cout << "}" << std::endl;
+}
+
 ReachSet ReachSet::rset_union(ReachSet *other)
 {
     auto out = ReachSet();
@@ -341,34 +359,35 @@ ReachSet ReachSet::rset_union(ReachSet *other)
 ReachingDefinition::ReachingDefinition() : label{-1}, entry{}, gen_kills{}, in_sol{ReachSet()}, out_sol(ReachSet()){};
 
 ReachingDefinition::ReachingDefinition(int label, std::set<int> entry, std::string gk)
-    : label{label}, entry{entry}, gen_kills{gk}, in_sol{ReachSet()}, out_sol(ReachSet())
-{
-    this->out_sol.gen_kill(gk, label);
-};
+    : label{label}, entry{entry}, gen_kills{gk}, in_sol{ReachSet()}, out_sol(ReachSet()), clean{true} {};
 
 ReachingDefinition::ReachingDefinition(int label, std::set<int> entry)
-    : label{label}, entry{entry}, gen_kills{}, in_sol{ReachSet()}, out_sol(ReachSet()){};
+    : label{label}, entry{entry}, gen_kills{}, in_sol{ReachSet()}, out_sol(ReachSet()), clean{true} {};
 
 bool ReachingDefinition::update(std::map<int, ReachingDefinition> &vec)
 {
-    bool in_modified = false;
+    bool in_modified = this->clean;
+    this->clean = false;
     for (int e : this->entry)
     {
         ReachingDefinition e_rd = vec[e];
         in_modified |= this->in_sol.add_elements(&e_rd.out_sol);
     }
+    // std::cout << "In modified: " << in_modified << std::endl;
     if (in_modified)
     {
+        // std::cout << "Input modified!" << std::endl;
+        this->out_sol = ReachSet(this->in_sol);
         if (this->gen_kills.has_value()) // If assignment node
         {
+            // std::cout << "Hmm" << std::endl;
             bool out_modified = this->out_sol.gen_kill(gen_kills.value(), this->label);
             return out_modified;
         }
         else
         {
             // Output is the same as input, so we know it is modified
-            this->out_sol = ReachSet(this->in_sol);
-            return true;
+            return in_modified;
         }
     }
     else

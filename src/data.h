@@ -97,6 +97,7 @@ struct ReachSet
     bool add_elements(ReachSet *other);
     void kill_assignments(std::string s);
     void add_assignment(std::string s, int label);
+    void print();
     ReachSet rset_union(ReachSet *other);
 };
 
@@ -107,6 +108,7 @@ struct ReachingDefinition
     std::optional<std::string> gen_kills;
     ReachSet in_sol;
     ReachSet out_sol;
+    bool clean;
     ReachingDefinition();
     ReachingDefinition(int label, std::set<int> entry, std::string gk);
     ReachingDefinition(int label, std::set<int> entry);
