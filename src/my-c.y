@@ -362,6 +362,14 @@ void analyzer() {
     
     }
     cout << endl;
+    // Update the entry for the first statement to include parameters
+    if (parms.size() > 0) {
+      ReachSet init_entry = ReachSet();
+      for (std::string p : parms) {
+        init_entry.data.insert({p, {-1}});
+      }
+      rds[start].in_sol = init_entry;
+    }
     worklist_algorithm(g, &rds);
   }
 }
@@ -377,18 +385,15 @@ void worklist_algorithm(FlowGraph *g, map<int, ReachingDefinition> *solutions) {
   while (worklist.size() > 0) {
     int front = worklist.front();
     worklist.pop_front();
-    cout << front << endl;
-    // cout << "Here?" << endl;
+    // cout << front << endl;
     ReachingDefinition *rd = &solutions->at(front);
-    // cout << "Not here?" << endl;
-    bool ret = rd->update(*solutions);
-    if (ret) {
-      // cout << "Let's keep working on " << front;
+    bool changed = rd->update(*solutions);
+    if (changed) {
+      // Add all immediate downstream nodes back to the worklist. 
       for (int label : g->edges[front]) {
         worklist.push_front(label);
       }
     }
-    // rd->out_sol.print();
   }
   for (auto pair : g->nodes) {
     int node_label = pair.first;

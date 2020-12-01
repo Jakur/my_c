@@ -308,28 +308,6 @@ bool ReachSet::add_elements(ReachSet *other)
     return modified;
 }
 
-void ReachSet::kill_assignments(std::string s)
-{
-    auto it = this->data.find(s);
-    if (it != this->data.end())
-    {
-        it->second.clear();
-    }
-}
-
-void ReachSet::add_assignment(std::string s, int label)
-{
-    auto it = this->data.find(s);
-    if (it != this->data.end())
-    {
-        it->second.insert(label);
-    }
-    else
-    {
-        this->data.insert(std::pair<std::string, std::set<int>>{s, std::set<int>{label}});
-    }
-}
-
 void ReachSet::print()
 {
     std::cout << "{";
@@ -345,15 +323,6 @@ void ReachSet::print()
     }
 
     std::cout << "}" << std::endl;
-}
-
-ReachSet ReachSet::rset_union(ReachSet *other)
-{
-    auto out = ReachSet();
-    auto out_set = &out.data;
-    out_set->insert(this->data.begin(), this->data.end());
-    out_set->insert(other->data.begin(), other->data.end());
-    return out;
 }
 
 ReachingDefinition::ReachingDefinition() : label{-1}, entry{}, gen_kills{}, in_sol{ReachSet()}, out_sol(ReachSet()){};

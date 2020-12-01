@@ -95,10 +95,7 @@ struct ReachSet
     std::map<std::string, std::set<int>> data;
     bool gen_kill(std::string s, int label);
     bool add_elements(ReachSet *other);
-    void kill_assignments(std::string s);
-    void add_assignment(std::string s, int label);
     void print();
-    ReachSet rset_union(ReachSet *other);
 };
 
 struct ReachingDefinition
