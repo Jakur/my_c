@@ -22,6 +22,11 @@ void Stmt::compute_flow(FlowGraph *g, int prev, int next)
   }
 }
 
+bool Stmt::is_loop()
+{
+  return false;
+}
+
 std::optional<std::string> Stmt::gen_set()
 {
   return {};
@@ -191,6 +196,11 @@ void WhileStmt::compute_flow(FlowGraph *g, int prev, int next)
     this->body->compute_flow(g, this->label(), next);
   }
   this->body->stmts[0]->compute_flow(g, -1, this->label());
+}
+
+bool WhileStmt::is_loop()
+{
+  return true;
 }
 
 std::optional<Data> Pass::execute(VarStorage *state)

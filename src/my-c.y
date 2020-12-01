@@ -25,7 +25,7 @@ using namespace std;
 int yylex();
 void yyerror(const char* s);
 void analyzer();
-void worklist_algorithm(FlowGraph *g, map<int, ReachingDefinition> *solutions);
+void worklist_algorithm(const char* fn_name, FlowGraph *g, map<int, ReachingDefinition> *solutions);
 BinaryOperator get_op(int x);
 
 %}
@@ -303,7 +303,8 @@ void analyzer() {
     auto g = new FlowGraph();
     it->second->stmts->compute_flow(g, -1, -1);
     auto rds = map<int, ReachingDefinition>();
-    std::cout << "Fn " << it->first << " Reaching Definitions: " << endl << endl;
+    std::string fn_name = it->first;
+    std::cout << "Fn " << fn_name << " Reaching Definitions: " << endl << endl;
     auto stmts = it->second->stmts->stmts;
     int start = stmts[stmts.size() - 1]->label();
     auto parms = it->second->parameters;
@@ -370,12 +371,12 @@ void analyzer() {
       }
       rds[start].in_sol = init_entry;
     }
-    worklist_algorithm(g, &rds);
+    worklist_algorithm(fn_name.c_str(), g, &rds);
   }
 }
 
-void worklist_algorithm(FlowGraph *g, map<int, ReachingDefinition> *solutions) {
-  cout << "Hello WorkList Algorithm!" << endl;
+void worklist_algorithm(const char* fn_name, FlowGraph *g, map<int, ReachingDefinition> *solutions) {
+  cout << "Executing WorkList Algorithm on function: " << fn_name << endl;
   auto worklist = list<int>();
   // Initialize the worklist with all labels in the flow
   for (auto pair : g->nodes) {
@@ -395,14 +396,16 @@ void worklist_algorithm(FlowGraph *g, map<int, ReachingDefinition> *solutions) {
       }
     }
   }
+  cout << "---Reaching Definitions Least Solution----" << endl;
   for (auto pair : g->nodes) {
     int node_label = pair.first;
     ReachingDefinition *rd = &solutions->at(node_label);
-    cout << "Label " << node_label << " Solution: ";
+    cout << "RD_Entry(" << node_label << "): ";
     rd->in_sol.print();
-    cout << "     ";
+    cout << "RD_Exit(" << node_label << "): ";
     rd->out_sol.print();
   }
+  cout << endl;
 }
 
 BinaryOperator get_op(int x) {

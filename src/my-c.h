@@ -30,6 +30,7 @@ struct Stmt
   virtual int label() = 0;
   virtual std::optional<std::string> gen_set();
   virtual std::optional<std::string> kill_set();
+  virtual bool is_loop();
 };
 
 struct MultiStmt : Stmt
@@ -74,6 +75,7 @@ struct WhileStmt : Stmt
   std::optional<Data> execute(VarStorage *state);
   void print(VarStorage *state);
   void compute_flow(FlowGraph *g, int prev, int next) override;
+  bool is_loop() override;
   int label() { return lab; };
 };
 
